@@ -1,0 +1,10 @@
+=======
+CHANGES
+=======
+
+Version 3.5.0 (2007/9/25)
+-------------------------
+
+- Initial release
+
+- Moved parts from zope.app.session to this packages
