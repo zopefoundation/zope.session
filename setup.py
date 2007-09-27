@@ -11,7 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Setup for zope.app.session package
+"""Setup for zope.session package
 
 $Id$
 """
@@ -24,10 +24,10 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.session',
-    version = '3.5.0',
+    version = '3.4.1',
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
-    description='Zope session',
+    description='Zope 3 Session Support',
     long_description=(
         read('README.txt')
         + '\n\n' +
@@ -49,22 +49,24 @@ setup(name='zope.session',
     packages=find_packages('src'),
     package_dir = {'': 'src'},
     namespace_packages=['zope',],
-    extras_require = dict(test=['zope.app.testing',
-                                'zope.app.zptpage',
-                                'zope.app.securitypolicy',
-                                'zope.app.zcmlfiles']),
-    install_requires=['setuptools',
-                      'ZODB3',
-                      'zope.annotation',
-                      'zope.app.appsetup',
-                      'zope.app.http',
-                      'zope.component',
-                      'zope.i18nmessageid',
-                      'zope.interface',
-                      'zope.location',
-                      'zope.publisher',
-                      'zope.minmax',
-                      ],
+    extras_require = dict(
+        test=['zope.app.testing',
+              'zope.app.zptpage',
+              'zope.app.securitypolicy',
+              'zope.app.zcmlfiles']),
+    install_requires=[
+        'setuptools',
+        'ZODB3',
+        'zope.annotation',
+        'zope.app.appsetup',
+        'zope.app.http',
+        'zope.component',
+        'zope.i18nmessageid',
+        'zope.interface',
+        'zope.location',
+        'zope.publisher',
+        'zope.minmax',
+        ],
     include_package_data = True,
     zip_safe = False,
     )
