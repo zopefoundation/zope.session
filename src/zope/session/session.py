@@ -515,7 +515,7 @@ class SessionData(persistent.Persistent, IterableUserDict):
 
 
 class SessionPkgData(persistent.Persistent, IterableUserDict):
-    """See zope.session.interfaces.ISessionData
+    """See zope.session.interfaces.ISessionPkgData
 
         >>> session = SessionPkgData()
         >>> ISessionPkgData.providedBy(session)
