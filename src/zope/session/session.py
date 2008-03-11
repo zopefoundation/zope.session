@@ -81,7 +81,8 @@ class PersistentSessionDataContainer(zope.location.Location,
     def __init__(self):
         self.data = OOBTree()
         self.timeout = 1 * 60 * 60
-        self.resolution = 50*60
+        # The "resolution" should be a small fraction of the timeout.
+        self.resolution = 10 * 60
 
     def __getitem__(self, pkg_id):
         """Retrieve an ISessionData

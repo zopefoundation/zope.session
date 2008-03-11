@@ -128,3 +128,26 @@ Page Templates
             <span tal:content="session/count" />
         </div>
 
+
+Session Timeout
+---------------
+
+Sessions have a timeout (defaulting to an hour, in seconds).
+
+    >>> import zope.session.session
+    >>> data_container = zope.session.session.PersistentSessionDataContainer()
+    >>> data_container.timeout
+    3600
+
+We need to keep up with when the session was last used (to know when it needs
+to be expired), but it would be too resource-intensive to write the last access
+time every, single time the session data is touched.  The session machinery
+compromises by only recording the last access time periodically.  That period
+is called the "resolution".  That also means that if the last-access-time +
+the-resolution < now, then the session is considered to have timed out.
+
+The default resolution is 10 minutes (600 seconds), meaning that a users
+session will actually time out sometime between 50 and 60 minutes.
+
+    >>> data_container.resolution
+    600
