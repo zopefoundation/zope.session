@@ -27,7 +27,7 @@ class IClientIdManager(Interface):
 
     def getClientId(request):
         """Return the client id for the given request as a string.
-        
+
         If the request doesn't have an attached sessionId a new one will be
         generated.
 
@@ -57,7 +57,7 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
       session_data_container[client_id][product_id][key] = value
 
     Note that this interface does not support the full mapping interface -
-    the keys need to remain secret so we can't give access to keys(), 
+    the keys need to remain secret so we can't give access to keys(),
     values() etc.
 
     """
@@ -94,7 +94,7 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
 class ISession(Interface):
     """This object allows retrieval of the correct ISessionData
     for a particular product id
-    
+
         >>> session = ISession(request)[product_id]
         >>> session['color'] = 'red'
         True
@@ -106,11 +106,11 @@ class ISession(Interface):
 
     def __getitem__(product_id):
         """Return the relevant ISessionPkgData
-        
-        This involves locating the correct ISessionDataContainer for the 
+
+        This involves locating the correct ISessionDataContainer for the
         given product id, determining the client id, and returning the
         relevant ISessionPkgData.
-        
+
         """
 
     def get(product_id, default=None):
@@ -120,9 +120,9 @@ class ISession(Interface):
 
 class ISessionData(IReadMapping, IMapping):
     """Storage for a particular product id's session data
-    
+
     Contains 0 or more ISessionPkgData instances
-    
+
     """
 
     lastAccessTime = schema.Int(
