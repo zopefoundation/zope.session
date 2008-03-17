@@ -79,7 +79,7 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
                 "out later than the 'Data object timeout value' by  a factor "
                 "of (at most) this many seconds."
                 ),
-            default=5*60,
+            default=10*60,
             required=True,
             min=0,
             )
