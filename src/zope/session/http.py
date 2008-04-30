@@ -140,17 +140,17 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         or Nginx `ngx_http_userid_module` are able to issue user tracking
         cookies in front of Zope. In case thirdparty is activated Zope may
         not set a cookie.
-        
+
           >>> bim.thirdparty = True
           >>> request3 = HTTPRequest(StringIO(''), {}, None)
           >>> bim.getClientId(request3)
           Traceback (most recent call last):
           ...
-          MissingClientIdException          
+          MissingClientIdException
           >>> cookie = request3.response.getCookie(bim.namespace)
           >>> cookie is None
           True
-          
+
         """
         sid = self.getRequestId(request)
         if sid is None:
@@ -158,7 +158,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
                 raise MissingClientIdException
             else:
                 sid = self.generateUniqueId()
-                
+
         if not self.thirdparty:
             self.setRequestId(request, sid)
 
@@ -224,14 +224,14 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         If another server is managing the ClientId cookies (Apache, Nginx)
         we're returning their value without checking:
-        
+
           >>> bim.namespace = 'uid'
           >>> bim.thirdparty = True
           >>> request3 = HTTPRequest(StringIO(''), {}, None)
           >>> request3._cookies = {'uid': 'AQAAf0Y4gjgAAAQ3AwMEAg=='}
           >>> bim.getRequestId(request3)
           'AQAAf0Y4gjgAAAQ3AwMEAg=='
-          
+
         """
         response_cookie = request.response.getCookie(self.namespace)
         if response_cookie:
@@ -304,10 +304,10 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             >>> expires = time.mktime(rfc822.parsedate(cookie['expires']))
             >>> expires > time.mktime(time.gmtime()) + 55*60
             True
-                        
+
         If another server in front of Zope (Apache, Nginx) is managing the
         cookies we won't set any ClientId cookies:
-        
+
           >>> request = HTTPRequest(StringIO(''), {}, None)
           >>> bim.thirdparty = True
           >>> bim.setRequestId(request, '1234')
@@ -325,7 +325,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         if self.thirdparty:
             logger.warning('ClientIdManager is using thirdparty cookies, '
-                'ignoring setIdRequest call')            
+                'ignoring setIdRequest call')
         else:
             if self.cookieLifetime is not None:
                 if self.cookieLifetime:
@@ -344,11 +344,11 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
 def notifyVirtualHostChanged(event):
     """Adjust cookie paths when IVirtualHostRequest information changes.
-    
-    Given a event, this method should call a CookieClientIdManager's 
+
+    Given an event, this method should call a CookieClientIdManager's
     setRequestId if a cookie is present in the response for that manager. To
     demonstrate we create a dummy manager object and event:
-    
+
         >>> class DummyManager(object):
         ...     implements(ICookieClientIdManager)
         ...     namespace = 'foo'
@@ -363,31 +363,31 @@ def notifyVirtualHostChanged(event):
         >>> class DummyEvent (object):
         ...     request = HTTPRequest(StringIO(''), {}, None)
         >>> event = DummyEvent()
-        
+
     With no cookies present, the manager should not be called:
-    
+
         >>> notifyVirtualHostChanged(event)
         >>> manager.request_id is None
         True
-        
+
     However, when a cookie *has* been set, the manager is called so it can
     update the cookie if need be:
-    
+
         >>> event.request.response.setCookie('foo', 'bar')
         >>> notifyVirtualHostChanged(event)
         >>> manager.request_id
         'bar'
-    
+
     If a server in front of Zope manages the ClientIds (Apache, Nginx), we
     don't need to take care about the cookies
 
         >>> manager2 = DummyManager()
         >>> manager2.thirdparty = True
         >>> event2 = DummyEvent()
-        
+
     However, when a cookie *has* been set, the manager is called so it can
     update the cookie if need be:
-    
+
         >>> event2.request.response.setCookie('foo2', 'bar2')
         >>> notifyVirtualHostChanged(event2)
         >>> id = manager2.request_id
@@ -395,20 +395,20 @@ def notifyVirtualHostChanged(event):
         True
 
     Cleanup of the utility registration:
-    
+
         >>> import zope.component.testing
         >>> zope.component.testing.tearDown()
-        
+
     """
     # the event sends us a IHTTPApplicationRequest, but we need a
     # IHTTPRequest for the response attribute, and so does the cookie-
     # manager.
     request = IHTTPRequest(event.request, None)
     if event.request is None:
-        return 
+        return
     for name, manager in component.getUtilitiesFor(IClientIdManager):
         if manager and ICookieClientIdManager.providedBy(manager):
-            # Third party ClientId Managers need no modification at all 
+            # Third party ClientId Managers need no modification at all
             if not manager.thirdparty:
                 cookie = request.response.getCookie(manager.namespace)
                 if cookie:
