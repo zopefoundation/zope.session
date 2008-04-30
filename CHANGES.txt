@@ -2,6 +2,11 @@
 CHANGES
 =======
 
+Version 3.5.1 (2008-04-30)
+
+- Split up the ZCML to make it possible to re-use more reasonably.
+
+
 Version 3.5.0 (2008-03-11)
 --------------------------
 

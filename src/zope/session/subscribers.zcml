@@ -1,0 +1,13 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <subscriber
+      for="zope.app.appsetup.IDatabaseOpenedEvent"
+      handler=".bootstrap.bootStrapSubscriber"
+      />
+
+  <subscriber
+      for="zope.publisher.interfaces.http.IHTTPVirtualHostChangedEvent"
+      handler=".http.notifyVirtualHostChanged"
+      />
+
+</configure>

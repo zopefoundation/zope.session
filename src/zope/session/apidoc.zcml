@@ -1,0 +1,20 @@
+<configure 
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:apidoc="http://namespaces.zope.org/apidoc"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    zcml:condition="have apidoc"
+    >
+
+  <apidoc:bookchapter
+      id="session"
+      title="Sessions"
+      doc_path="design.txt"
+      />
+  <apidoc:bookchapter
+      id="api"
+      title="API"
+      doc_path="api.txt"
+      parent="session"
+      />
+
+</configure>

@@ -1,0 +1,20 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <adapter
+      factory=".session.ClientId"
+      permission="zope.Public" 
+      />
+
+  <adapter
+      factory=".session.Session"
+      provides=".interfaces.ISession"
+      permission="zope.Public"
+      />
+
+  <adapter
+      factory=".session.Session"
+      provides="zope.traversing.interfaces.IPathAdapter"
+      name="session"
+      />
+
+</configure>
