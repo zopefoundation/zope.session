@@ -2,6 +2,12 @@
 CHANGES
 =======
 
+version 3.5.2 (2008-06-12)
+--------------------------
+
+- Remove ConflictErrors caused on SessionData caused by setting
+  ``lastAccessTime``.
+
 Version 3.5.1 (2008-04-30)
 --------------------------
 

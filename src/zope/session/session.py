@@ -70,7 +70,7 @@ class ClientId(str):
 
 
 class PersistentSessionDataContainer(zope.location.Location,
-    persistent.Persistent, 
+    persistent.Persistent,
     IterableUserDict):
     """A SessionDataContainer that stores data in the ZODB"""
 
@@ -96,7 +96,7 @@ class PersistentSessionDataContainer(zope.location.Location,
         To ensure stale data is removed, we can wind
         back the clock using undocumented means...
 
-            >>> sd.lastAccessTime = sd.lastAccessTime - 64
+            >>> sd.setLastAccessTime(sd.getLastAccessTime() - 64)
             >>> sdc._v_last_sweep = sdc._v_last_sweep - 4
 
         Now the data should be garbage collected
@@ -106,7 +106,7 @@ class PersistentSessionDataContainer(zope.location.Location,
                 [...]
             KeyError: 'clientid'
 
-        Ensure lastAccessTime on the ISessionData is being updated
+        Ensure the lastAccessTime on the ISessionData is being updated
         occasionally. The ISessionDataContainer maintains this whenever
         the ISessionData is set or retrieved.
 
@@ -114,29 +114,30 @@ class PersistentSessionDataContainer(zope.location.Location,
         to the ISessionDataContainer
 
             >>> sdc['client_id'] = sd = SessionData()
-            >>> sd.lastAccessTime > 0
+            >>> sd.getLastAccessTime() > 0
             True
 
-        lastAccessTime is also updated whenever the ISessionData
+        The lastAccessTime is also updated whenever the ISessionData
         is retrieved through the ISessionDataContainer, at most
         once every 'resolution' seconds.
 
-            >>> then = sd.lastAccessTime = sd.lastAccessTime - 4
-            >>> now = sdc['client_id'].lastAccessTime
+            >>> then = sd.getLastAccessTime() - 4
+            >>> sd.setLastAccessTime(then)
+            >>> now = sdc['client_id'].getLastAccessTime()
             >>> now > then
             True
             >>> time.sleep(1)
-            >>> now == sdc['client_id'].lastAccessTime
+            >>> now == sdc['client_id'].getLastAccessTime()
             True
 
-        Ensure lastAccessTime is not modified and no garbage collection
+        Ensure the lastAccessTime is not modified and no garbage collection
         occurs when timeout == 0. We test this by faking a stale
         ISessionData object.
 
             >>> sdc.timeout = 0
-            >>> sd.lastAccessTime = sd.lastAccessTime - 5000
-            >>> lastAccessTime = sd.lastAccessTime
-            >>> sdc['client_id'].lastAccessTime == lastAccessTime
+            >>> sd.setLastAccessTime(sd.getLastAccessTime() - 5000)
+            >>> lastAccessTime = sd.getLastAccessTime()
+            >>> sdc['client_id'].getLastAccessTime() == lastAccessTime
             True
 
         Next, we test session expiration functionality beyond transactions.
@@ -163,7 +164,7 @@ class PersistentSessionDataContainer(zope.location.Location,
 
             >>> sdc = c.root()['sdc']
             >>> sd = sdc['pkg_id']
-            >>> sd.lastAccessTime = sd.lastAccessTime - 64
+            >>> sd.setLastAccessTime(sd.getLastAccessTime() - 64)
             >>> sdc._v_last_sweep = sdc._v_last_sweep - 4
             >>> transaction.commit()
 
@@ -211,10 +212,10 @@ class PersistentSessionDataContainer(zope.location.Location,
             self._v_last_sweep = now
 
         rv = IterableUserDict.__getitem__(self, pkg_id)
-        # Only update lastAccessTime once every few minutes, rather than
+        # Only update the lastAccessTime once every few minutes, rather than
         # every hit, to avoid ZODB bloat and conflicts
-        if rv.lastAccessTime + self.resolution < now:
-            rv.lastAccessTime = int(now)
+        if rv.getLastAccessTime() + self.resolution < now:
+            rv.setLastAccessTime(int(now))
         return rv
 
     def __setitem__(self, pkg_id, session_data):
@@ -225,10 +226,10 @@ class PersistentSessionDataContainer(zope.location.Location,
 
         __setitem__ sets the ISessionData's lastAccessTime
 
-            >>> sad.lastAccessTime
+            >>> sad.getLastAccessTime()
             0
             >>> sdc['1'] = sad
-            >>> 0 < sad.lastAccessTime <= time.time()
+            >>> 0 < sad.getLastAccessTime() <= time.time()
             True
 
         We can retrieve the same object we put in
@@ -237,7 +238,7 @@ class PersistentSessionDataContainer(zope.location.Location,
             True
 
         """
-        session_data.lastAccessTime = int(time.time())
+        session_data.setLastAccessTime(int(time.time()))
         return IterableUserDict.__setitem__(self, pkg_id, session_data)
 
     def sweep(self):
@@ -250,7 +251,8 @@ class PersistentSessionDataContainer(zope.location.Location,
         Wind back the clock on one of the ISessionData's
         so it gets garbage collected
 
-            >>> sdc['2'].lastAccessTime -= sdc.timeout * 2
+            >>> sdc['2'].setLastAccessTime(
+            ...     sdc['2'].getLastAccessTime() - sdc.timeout * 2)
 
         Sweep should leave '1' and remove '2'
 
@@ -267,7 +269,7 @@ class PersistentSessionDataContainer(zope.location.Location,
         # calculating the expiry time to ensure that we never remove
         # data that has been accessed within timeout seconds.
         expire_time = time.time() - self.timeout - self.resolution
-        heap = [(v.lastAccessTime, k) for k,v in self.data.items()]
+        heap = [(v.getLastAccessTime(), k) for k,v in self.data.items()]
         heapify(heap)
         while heap:
             lastAccessTime, key = heappop(heap)
@@ -345,11 +347,11 @@ class Session(object):
 
            If we use get we get None or default returned if the pkg_id
            is not there.
-           
+
             >>> session = Session(request).get('not.there', 'default')
             >>> session
             'default'
-            
+
            This method is lazy and does not create the session data.
             >>> session = Session(request).get('not.there')
             >>> session is None
@@ -379,7 +381,7 @@ class Session(object):
             return sd[pkg_id]
         except KeyError:
             return default
-        
+
 
     def __getitem__(self, pkg_id):
         """See zope.session.interfaces.ISession
@@ -446,7 +448,7 @@ class SessionData(persistent.Persistent, IterableUserDict):
         >>> session = SessionData()
         >>> ISessionData.providedBy(session)
         True
-        >>> session.lastAccessTime
+        >>> session.getLastAccessTime()
         0
 
     Before the zope.minmax package this class used to have an attribute
@@ -466,14 +468,14 @@ class SessionData(persistent.Persistent, IterableUserDict):
 
         >>> legacy_session = SessionData()
         >>> del legacy_session._lastAccessTime
-        >>> legacy_session.lastAccessTime
+        >>> legacy_session.getLastAccessTime()
         0
 
     Now, artificially add lastAccessTime to the instance's dictionary.
     This should make it exactly like the legacy SessionData().
 
         >>> legacy_session.__dict__['lastAccessTime'] = 42
-        >>> legacy_session.lastAccessTime
+        >>> legacy_session.getLastAccessTime()
         42
 
     Finally, assign to lastAccessTime.  Since the instance now looks like a
@@ -481,7 +483,7 @@ class SessionData(persistent.Persistent, IterableUserDict):
     creation of a zope.minmax.Maximum() object which will take over the
     handling of this value and its conflict resolution from now on.
 
-        >>> legacy_session.lastAccessTime = 13
+        >>> legacy_session.setLastAccessTime(13)
         >>> legacy_session._lastAccessTime.value
         13
 
@@ -496,22 +498,25 @@ class SessionData(persistent.Persistent, IterableUserDict):
         self.data = OOBTree()
         self._lastAccessTime = zope.minmax.Maximum(0)
 
-    def _getLastAccessTime(self):
+    # we include this for parallelism with setLastAccessTime
+    def getLastAccessTime(self):
         # this conditional is for legacy sessions; this comment and
         # the next two lines will be removed in a later release
         if self._lastAccessTime is None:
             return self.__dict__.get('lastAccessTime', 0)
         return self._lastAccessTime.value
 
-    def _setLastAccessTime(self, value):
+    # we need to set this value with setters in order to get optimal conflict
+    # resolution behavior
+    def setLastAccessTime(self, value):
         # this conditional is for legacy sessions; this comment and
         # the next two lines will be removed in a later release
         if self._lastAccessTime is None:
             self._lastAccessTime = zope.minmax.Maximum(0)
         self._lastAccessTime.value = value
 
-    lastAccessTime = property(fget=_getLastAccessTime,
-                              fset=_setLastAccessTime,
+    lastAccessTime = property(fget=getLastAccessTime,
+                              fset=setLastAccessTime, # consider deprecating
                               doc='integer value of the last access time')
 
 
@@ -525,4 +530,3 @@ class SessionPkgData(persistent.Persistent, IterableUserDict):
     zope.interface.implements(ISessionPkgData)
     def __init__(self):
         self.data = OOBTree()
-

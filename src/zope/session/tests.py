@@ -93,6 +93,62 @@ def tearDownTransaction(test):
     transaction.abort()
 
 
+def testConflicts():
+    """The SessionData objects have been plagued with unnecessary
+    ConflictErrors.  The current implementation makes the most common source
+    of ConflictErrors in the past, setting the lastAccessTime, no longer a
+    problem in this regard.
+
+    To illustrate this, we will do a bit of an integration test.  We'll begin
+    by getting a connection and putting a session data container in the root,
+    within transaction manager "A".
+
+    >>> from ZODB.DB import DB
+    >>> from ZODB.tests.util import ConflictResolvingMappingStorage
+    >>> from zope.session.session import (
+    ...     PersistentSessionDataContainer, SessionData)
+    >>> db = DB(ConflictResolvingMappingStorage())
+    >>> import transaction
+    >>> tm_A = transaction.TransactionManager()
+    >>> conn_A = db.open(transaction_manager=tm_A)
+    >>> root_A = conn_A.root()
+    >>> sdc_A = root_A['sdc'] = PersistentSessionDataContainer()
+    >>> sdc_A.resolution = 3
+    >>> sd_A = sdc_A['clientid'] = SessionData()
+    >>> then = sd_A.getLastAccessTime() - 4
+    >>> sd_A.setLastAccessTime(then)
+    >>> tm_A.commit()
+
+    Now we have a session data container with a session data lastAccessTime
+    that is set to four seconds ago.  Since we set the resolution to three
+    seconds, the next time the session is accessed, the lastAccessTime should
+    be updated.
+
+    We will access the session simultaneously in two transactions, which will
+    set the updated lastAccessTime on both objects, and then commit.  Because
+    of the conflict resolution code in zope.minmax, both commits will succeed,
+    which is what we wanted to demonstrate.
+
+    >>> tm_B = transaction.TransactionManager()
+    >>> conn_B = db.open(transaction_manager=tm_B)
+    >>> root_B = conn_B.root()
+    >>> sdc_B = root_B['sdc']
+
+    >>> sd_B = sdc_B['clientid'] # has side effect of updating lastAccessTime
+    >>> sd_B.getLastAccessTime() > then
+    True
+
+    >>> sd_A is sdc_A['clientid'] # has side effect of updating lastAccessTime
+    True
+    >>> sd_A.getLastAccessTime() > then
+    True
+
+    >>> tm_A.commit()
+    >>> tm_B.commit()
+
+    Q.E.D.
+    """
+
 
 def test_suite():
     suite = unittest.TestSuite()

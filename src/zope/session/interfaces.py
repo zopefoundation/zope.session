@@ -125,6 +125,15 @@ class ISessionData(IReadMapping, IMapping):
 
     """
 
+    def getLastAccessTime():
+        "return approximate epoch time this ISessionData was last retrieved"
+
+    def setLastAccessTime():
+        "An API for ISessionDataContainer to set the last retrieved epoch time"
+
+    # consider deprecating this property, or at least making it readonly.  The
+    # setter should be used instead of setting this property because of
+    # conflict resolution: see https://bugs.launchpad.net/zope3/+bug/239531
     lastAccessTime = schema.Int(
             title=_("Last Access Time"),
             description=_(
