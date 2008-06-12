@@ -24,7 +24,7 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.session',
-    version = '3.5.2',
+    version = '3.5.3dev',
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
     description='Zope 3 Session Support',
