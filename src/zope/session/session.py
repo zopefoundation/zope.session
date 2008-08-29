@@ -461,7 +461,7 @@ class SessionData(persistent.Persistent, IterableUserDict):
     be removed in a later release (see the comments in the code below).
 
     First, create an instance of SessionData and remove a protected attribute
-    _lastAcessTime from it to make it more like the legacy SessionData.  The
+    _lastAccessTime from it to make it more like the legacy SessionData.  The
     subsequent attempt to get lastAccessTime will return a 0, because the
     lastAccessTime is not there and the dictionary returns the default value
     zero supplied to its get() method.
