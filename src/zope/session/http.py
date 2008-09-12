@@ -92,6 +92,11 @@ class ICookieClientIdManager(IClientIdManager):
             default=False,
             )
 
+    secure = schema.Bool(
+        title=_('Request Secure communication'),
+        required=False,
+        default=False,
+        )
 
 class CookieClientIdManager(zope.location.Location, Persistent):
     """Session utility implemented using cookies."""
@@ -100,6 +105,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
     thirdparty = FieldProperty(ICookieClientIdManager['thirdparty'])
     cookieLifetime = FieldProperty(ICookieClientIdManager['cookieLifetime'])
+    secure = FieldProperty(ICookieClientIdManager['secure'])
 
     def __init__(self):
         self.namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
@@ -158,8 +164,10 @@ class CookieClientIdManager(zope.location.Location, Persistent):
                 raise MissingClientIdException
             else:
                 sid = self.generateUniqueId()
-
-        if not self.thirdparty:
+                self.setRequestId(request, sid)
+        elif (not self.thirdparty) and self.cookieLifetime:
+            # If we have a finite cookie lifetime, then set the cookie
+            # on each request to avoid losing it.
             self.setRequestId(request, sid)
 
         return sid
@@ -242,9 +250,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if self.thirdparty:
             return sid
         else:
-            # If there is an id set on the response, use that but don't trust it.
-            # We need to check the response in case there has already been a new
-            # session created during the course of this request.
+            
+            # If there is an id set on the response, use that but
+            # don't trust it.  We need to check the response in case
+            # there has already been a new session created during the
+            # course of this request.
+
             if sid is None or len(sid) != 54:
                 return None
             s, mac = sid[:27], sid[27:]
@@ -261,7 +272,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         See the examples in getRequestId.
 
-        Note that the id is checkec for validity. Setting an
+        Note that the id is checked for validity. Setting an
         invalid value is silently ignored:
 
             >>> from zope.publisher.http import HTTPRequest
@@ -276,9 +287,6 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             >>> cookie = request.response.getCookie(bim.namespace)
             >>> cookie['path'] == request.getApplicationURL(path_only=True)
             True
-
-        In the future, it should be the site containing the
-        CookieClientIdManager
 
         By default, session cookies don't expire:
 
@@ -313,6 +321,20 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.setRequestId(request, '1234')
           >>> cookie = request.response.getCookie(bim.namespace)
           >>> cookie
+
+        If the secure attribute is set to a true value, then the
+        secure cookie option is included.
+        
+          >>> bim.thirdparty = False
+          >>> bim.cookieLifetime = None
+          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> bim.secure = True
+          >>> bim.setRequestId(request, '1234')
+          >>> print request.response.getCookie(bim.namespace)
+          {'path': '/', 'secure': True, 'value': '1234'}
+
+          
+
         """
         # TODO: Currently, the path is the ApplicationURL. This is reasonable,
         #     and will be adequate for most purposes.
@@ -327,20 +349,22 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             logger.warning('ClientIdManager is using thirdparty cookies, '
                 'ignoring setIdRequest call')
         else:
+            options = {}
             if self.cookieLifetime is not None:
                 if self.cookieLifetime:
                     expires = build_http_date(time.time() + self.cookieLifetime)
                 else:
                     expires = 'Tue, 19 Jan 2038 00:00:00 GMT'
-                request.response.setCookie(
-                        self.namespace, id, expires=expires,
-                        path=request.getApplicationURL(path_only=True)
-                        )
-            else:
-                request.response.setCookie(
-                        self.namespace, id,
-                        path=request.getApplicationURL(path_only=True)
-                        )
+
+                options['expires'] = expires
+
+            if self.secure:
+                options['secure'] = True
+
+            request.response.setCookie(
+                self.namespace, id,
+                path=request.getApplicationURL(path_only=True),
+                **options)
 
 def notifyVirtualHostChanged(event):
     """Adjust cookie paths when IVirtualHostRequest information changes.
