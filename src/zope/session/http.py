@@ -142,6 +142,23 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> type(id) == type('')
           True
 
+        We don't set the client id unless we need to, so, for example,
+        the second response doesn't have cookies set:
+
+          >>> request2.response._cookies
+          {}
+
+        An exception to this is if the cookieLifetime is set to a
+        non-zero integer value, in which case we do set it on every
+        request, regardless of when it was last set:
+        
+          >>> bim.cookieLifetime = 3600 # one hour
+          >>> id == bim.getClientId(request2)
+          True
+
+          >>> bool(request2.response._cookies)
+          True
+
         It's also possible to use third-party cookies. E.g. Apache `mod_uid`
         or Nginx `ngx_http_userid_module` are able to issue user tracking
         cookies in front of Zope. In case thirdparty is activated Zope may
@@ -333,7 +350,16 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> print request.response.getCookie(bim.namespace)
           {'path': '/', 'secure': True, 'value': '1234'}
 
-          
+
+        When the cookie is set, cache headers are added to the
+        response to try to prevent the cookie header from being cached:
+
+          >>> request.response.getHeader('Cache-Control')
+          'no-cache="Set-Cookie,Set-Cookie2"'
+          >>> request.response.getHeader('Pragma')
+          'no-cache'
+          >>> request.response.getHeader('Expires')
+          'Mon, 26 Jul 1997 05:00:00 GMT'
 
         """
         # TODO: Currently, the path is the ApplicationURL. This is reasonable,
@@ -348,23 +374,29 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if self.thirdparty:
             logger.warning('ClientIdManager is using thirdparty cookies, '
                 'ignoring setIdRequest call')
-        else:
-            options = {}
-            if self.cookieLifetime is not None:
-                if self.cookieLifetime:
-                    expires = build_http_date(time.time() + self.cookieLifetime)
-                else:
-                    expires = 'Tue, 19 Jan 2038 00:00:00 GMT'
+            return
 
-                options['expires'] = expires
+        response = request.response
+        options = {}
+        if self.cookieLifetime is not None:
+            if self.cookieLifetime:
+                expires = build_http_date(time.time() + self.cookieLifetime)
+            else:
+                expires = 'Tue, 19 Jan 2038 00:00:00 GMT'
 
-            if self.secure:
-                options['secure'] = True
+            options['expires'] = expires
 
-            request.response.setCookie(
-                self.namespace, id,
-                path=request.getApplicationURL(path_only=True),
-                **options)
+        if self.secure:
+            options['secure'] = True
+
+        response.setCookie(
+            self.namespace, id,
+            path=request.getApplicationURL(path_only=True),
+            **options)
+
+        response.setHeader('Cache-Control', 'no-cache="Set-Cookie,Set-Cookie2"')
+        response.setHeader('Pragma', 'no-cache')
+        response.setHeader('Expires', 'Mon, 26 Jul 1997 05:00:00 GMT')
 
 def notifyVirtualHostChanged(event):
     """Adjust cookie paths when IVirtualHostRequest information changes.
