@@ -12,12 +12,6 @@ New features:
   broken caches handing the same client id out to multiple users. (Of
   course, it doesn't help if caches are broken enough to cache POSTs.)
 
-- Only set the client-id cookie if it isn't already set and try to
-  prevent the header from being cached.  This is to minimize risk from
-  broken caches handing the same client id out to multiple users. 
-
-
-
 version 3.6.0 (2008-08-12)
 --------------------------
 
