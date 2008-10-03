@@ -2,6 +2,22 @@
 CHANGES
 =======
 
+version 3.7.0 (2008-10-03)
+--------------------------
+
+New features:
+
+- Added a 'postOnly' option on CookieClientIdManagers to only allow setting
+  the client id cookie on POST requests.  This is to further reduce risk from
+  broken caches handing the same client id out to multiple users. (Of
+  course, it doesn't help if caches are broken enough to cache POSTs.)
+
+- Only set the client-id cookie if it isn't already set and try to
+  prevent the header from being cached.  This is to minimize risk from
+  broken caches handing the same client id out to multiple users. 
+
+
+
 version 3.6.0 (2008-08-12)
 --------------------------
 

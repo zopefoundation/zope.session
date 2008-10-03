@@ -98,6 +98,12 @@ class ICookieClientIdManager(IClientIdManager):
         default=False,
         )
 
+    postOnly = schema.Bool(
+        title=_('Only set cookie on POST requests'),
+        required=False,
+        default=False,
+        )
+
 class CookieClientIdManager(zope.location.Location, Persistent):
     """Session utility implemented using cookies."""
 
@@ -106,6 +112,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
     thirdparty = FieldProperty(ICookieClientIdManager['thirdparty'])
     cookieLifetime = FieldProperty(ICookieClientIdManager['cookieLifetime'])
     secure = FieldProperty(ICookieClientIdManager['secure'])
+    postOnly = FieldProperty(ICookieClientIdManager['postOnly'])
 
     def __init__(self):
         self.namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
@@ -117,7 +124,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         This creates one if necessary:
 
           >>> from zope.publisher.http import HTTPRequest
-          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> request = HTTPRequest(StringIO(''), {})
           >>> bim = CookieClientIdManager()
           >>> id = bim.getClientId(request)
           >>> id == bim.getClientId(request)
@@ -125,7 +132,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         The id is retained accross requests:
 
-          >>> request2 = HTTPRequest(StringIO(''), {}, None)
+          >>> request2 = HTTPRequest(StringIO(''), {})
           >>> request2._cookies = dict(
           ...   [(name, cookie['value'])
           ...    for (name, cookie) in request.response._cookies.items()
@@ -159,25 +166,51 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bool(request2.response._cookies)
           True
 
+        If the postOnly attribute is set to a true value, then cookies
+        will only be set on POST requests.
+
+          >>> bim.postOnly = True
+          >>> request = HTTPRequest(StringIO(''), {})
+          >>> bim.getClientId(request)
+          Traceback (most recent call last):
+          ...
+          MissingClientIdException
+
+          >>> print request.response.getCookie(bim.namespace)
+          None
+        
+          >>> request = HTTPRequest(StringIO(''), {'REQUEST_METHOD': 'POST'})
+          >>> id = bim.getClientId(request)
+          >>> id == bim.getClientId(request)
+          True
+          
+          >>> request.response.getCookie(bim.namespace) is not None
+          True
+
+          >>> bim.postOnly = False
+
         It's also possible to use third-party cookies. E.g. Apache `mod_uid`
         or Nginx `ngx_http_userid_module` are able to issue user tracking
         cookies in front of Zope. In case thirdparty is activated Zope may
         not set a cookie.
 
           >>> bim.thirdparty = True
-          >>> request3 = HTTPRequest(StringIO(''), {}, None)
-          >>> bim.getClientId(request3)
+          >>> request = HTTPRequest(StringIO(''), {})
+          >>> bim.getClientId(request)
           Traceback (most recent call last):
           ...
           MissingClientIdException
-          >>> cookie = request3.response.getCookie(bim.namespace)
-          >>> cookie is None
-          True
+
+          >>> print request.response.getCookie(bim.namespace)
+          None
 
         """
         sid = self.getRequestId(request)
         if sid is None:
-            if self.thirdparty:
+            if (self.thirdparty
+                or
+                (self.postOnly and not (request.method == 'POST'))
+                ):
                 raise MissingClientIdException
             else:
                 sid = self.generateUniqueId()
