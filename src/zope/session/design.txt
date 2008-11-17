@@ -110,37 +110,3 @@ Sessions introduce a number of issues to be considered:
   a data expiration strategy can be informed by, but need not be
   constrained by a session-expiration strategy.
 
-Application programming interface
----------------------------------
-
-Application code will merely adapt request objects to a session data
-interface.  Initially, we will define the session data interface
-``ISession``.  It provides a mapping interface. Keys in the mapping
-are application identifiers. Values are persistent mapping objects.
-
-Application code that wants to get object session data for a request
-adapts the request to ``ISession``::
-
-  appkey = "mycorp.actionplan"
-  data = ISession(request)[appkey]
-
-where ``appkey`` is a dotted name that identifies the application.
-Given the session data, the application can then store data in it::
-
-  data['original'] = original_actions
-  data['new'] = new_actions
-
-From ZPT, you can access session data using adapter syntax::
-
-  request/session:key
-
-So, for example, to access the ``old`` key for the session data for
-the sample key above:
-
-  request/session:mycorp.actionplan/old
-
-In this example, the data for an aplication key was a mapping object.
-The semantics of a session data for a particular application key are
-determined by the session data type interface.  ``ISession`` defines
-the application data to be a mapping object by default.  Other data
-interfaces could specify different bahavior.
