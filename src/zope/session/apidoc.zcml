@@ -3,6 +3,7 @@
     xmlns:apidoc="http://namespaces.zope.org/apidoc"
     xmlns:zcml="http://namespaces.zope.org/zcml"
     zcml:condition="have apidoc"
+    i18n_domain="zope"
     >
 
   <apidoc:bookchapter
