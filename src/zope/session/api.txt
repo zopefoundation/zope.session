@@ -101,32 +101,32 @@ Data stored in the session must be persistent or picklable.
         [...]
     TypeError: can't pickle file objects
 
-    Clean up:
+Clean up:
+
     >>> transaction.abort()
 
 
 Page Templates
 --------------
 
-    Session data may be accessed in page template documents using
-    TALES::
+Session data may be accessed in page template documents using TALES::
 
-        <span tal:content="request/session:products.foo/color | default">
-            green
-        </span>
+    <span tal:content="request/session:products.foo/color | default">
+        green
+    </span>
 
-    or::
+or::
 
-        <div tal:define="session request/session:products.foo">
-            <script type="text/server-python">
-                try:
-                    session['count'] += 1
-                except KeyError:
-                    session['count'] = 1
-            </script>
+    <div tal:define="session request/session:products.foo">
+        <script type="text/server-python">
+            try:
+                session['count'] += 1
+            except KeyError:
+                session['count'] = 1
+        </script>
 
-            <span tal:content="session/count" />
-        </div>
+        <span tal:content="session/count" />
+    </div>
 
 
 Session Timeout
