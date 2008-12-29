@@ -103,11 +103,17 @@ def testConflicts():
     by getting a connection and putting a session data container in the root,
     within transaction manager "A".
 
-    >>> from ZODB.DB import DB
-    >>> from ZODB.tests.util import ConflictResolvingMappingStorage
+    >>> try:
+    ...     # ZODB 3.8
+    ...     from ZODB.DB import DB
+    ...     from ZODB.tests.util import ConflictResolvingMappingStorage
+    ...     db = DB(ConflictResolvingMappingStorage())
+    ... except ImportError:
+    ...     # ZODB 3.9 (ConflictResolvingMappingStorage no longer exists)
+    ...     import ZODB.DB
+    ...     db = ZODB.DB('Data.fs')
     >>> from zope.session.session import (
     ...     PersistentSessionDataContainer, SessionData)
-    >>> db = DB(ConflictResolvingMappingStorage())
     >>> import transaction
     >>> tm_A = transaction.TransactionManager()
     >>> conn_A = db.open(transaction_manager=tm_A)

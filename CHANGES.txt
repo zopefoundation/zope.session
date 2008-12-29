@@ -7,6 +7,11 @@ version 3.7.1 (unreleased)
 
 - Specify i18n_domain for titles in apidoc.zcml
 
+- ZODB 3.9 no longer contains
+  ZODB.utils.ConflictResolvingMappingStorage, fixed tests, so they
+  work both with ZODB 3.8 and 3.9.
+
+
 version 3.7.0 (2008-10-03)
 --------------------------
 
