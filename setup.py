@@ -30,6 +30,10 @@ setup(name='zope.session',
     description='Zope 3 Session Support',
     long_description=(
         read('README.txt')
+        + '\n\n.. contents::\n\n' +
+        read('src', 'zope', 'session', 'design.txt')
+        + '\n\n' +
+        read('src', 'zope', 'session', 'api.txt')
         + '\n\n' +
         read('CHANGES.txt')
         ),
