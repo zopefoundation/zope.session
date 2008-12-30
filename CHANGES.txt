@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-version 3.7.1 (unreleased)
+version 3.7.1 (2008-12-30)
 --------------------------
 
 - Specify i18n_domain for titles in apidoc.zcml
