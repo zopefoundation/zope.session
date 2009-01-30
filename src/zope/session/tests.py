@@ -64,7 +64,7 @@ class TestBootstrap(TestBootstrapSubscriber):
 
         import zope.component
         from zope.app.publication.zopepublication import ZopePublication
-        from zope.app.component.hooks import setSite
+        from zope.site.hooks import setSite
 
         cx = self.db.open()
         root = cx.root()
