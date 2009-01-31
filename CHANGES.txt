@@ -2,7 +2,7 @@ CHANGES
 =======
 
 
-version 3.8.0 (unreleased)
+version 3.8.0 (2008-12-31)
 --------------------------
 
 - Add missing test dependency on ``zope.site`` and
