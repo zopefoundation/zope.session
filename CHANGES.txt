@@ -4,7 +4,8 @@ CHANGES
 version 3.8.1 (unreleased)
 --------------------------
 
-- ...
+- Python 2.6 compatability change. Encode strings before calling hmac.new()
+  as the function no longer accepts the unicode() type.
 
 version 3.8.0 (2008-12-31)
 --------------------------
