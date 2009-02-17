@@ -280,6 +280,14 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.getRequestId(request) == bim.getRequestId(request2)
           True
 
+        Test a corner case where Python 2.6 hmac module does not allow
+        unicode as input:
+
+          >>> id_uni = unicode(bim.generateUniqueId())
+          >>> bim.setRequestId(request, id_uni)
+          >>> bim.getRequestId(request) == id_uni
+          True
+        
         If another server is managing the ClientId cookies (Apache, Nginx)
         we're returning their value without checking:
 
@@ -289,7 +297,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> request3._cookies = {'uid': 'AQAAf0Y4gjgAAAQ3AwMEAg=='}
           >>> bim.getRequestId(request3)
           'AQAAf0Y4gjgAAAQ3AwMEAg=='
-
+        
         """
         response_cookie = request.response.getCookie(self.namespace)
         if response_cookie:
@@ -309,8 +317,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             if sid is None or len(sid) != 54:
                 return None
             s, mac = sid[:27], sid[27:]
-            if (digestEncode(hmac.new(s, self.secret, digestmod=sha).digest())
-                != mac):
+            
+            # call encode() on value s a workaround a bug where the hmac
+            # module only accepts str() types in Python 2.6
+            if (digestEncode(hmac.new(
+                    s.encode(), self.secret, digestmod=sha
+                ).digest()) != mac):
                 return None
             else:
                 return sid
