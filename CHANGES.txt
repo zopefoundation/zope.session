@@ -4,6 +4,10 @@ CHANGES
 3.8.1 (unreleased)
 ------------------
 
+- Add an ability to set cookie effective domain for CookieClientIdManager.
+  This is useful for simple cases when you have your application set up on
+  one domain and you want your identification cookie be active for subdomains.
+
 - Python 2.6 compatibility change. Encode strings before calling hmac.new()
   as the function no longer accepts the unicode() type.
 

@@ -92,6 +92,23 @@ class ICookieClientIdManager(IClientIdManager):
             default=False,
             )
 
+    domain = schema.TextLine(
+            title=_('Effective domain'),
+            description=_(
+                "An identification cookie can be restricted to a specific domain "
+                "using this option. This option sets the ``domain`` attribute "
+                "for the cookie header. It is useful for setting one "
+                "identification cookie for multiple subdomains. So if this "
+                "option is set to ``.example.org``, the cookie will be available "
+                "for subdomains like ``yourname.example.org``. "
+                "Note that if you set this option to some domain, the identification "
+                "cookie won't be available for other domains, so, for example "
+                "you won't be able to login using the SessionCredentials plugin "
+                "via another domain."
+                ),
+            required=False,
+            )
+
     secure = schema.Bool(
         title=_('Request Secure communication'),
         required=False,
@@ -113,6 +130,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
     cookieLifetime = FieldProperty(ICookieClientIdManager['cookieLifetime'])
     secure = FieldProperty(ICookieClientIdManager['secure'])
     postOnly = FieldProperty(ICookieClientIdManager['postOnly'])
+    domain = FieldProperty(ICookieClientIdManager['domain'])
 
     def __init__(self):
         self.namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
@@ -395,6 +413,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> print request.response.getCookie(bim.namespace)
           {'path': '/', 'secure': True, 'value': '1234'}
 
+        If the domain is specified, it will be set as a cookie attribute.
+
+          >>> bim.domain = u'.example.org'
+          >>> bim.setRequestId(request, '1234')
+          >>> print request.response.getCookie(bim.namespace)
+          {'path': '/', 'domain': u'.example.org', 'secure': True, 'value': '1234'}
 
         When the cookie is set, cache headers are added to the
         response to try to prevent the cookie header from being cached:
@@ -433,6 +457,9 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         if self.secure:
             options['secure'] = True
+
+        if self.domain:
+            options['domain'] = self.domain
 
         response.setCookie(
             self.namespace, id,
