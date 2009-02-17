@@ -1,20 +1,20 @@
 CHANGES
 =======
 
-version 3.8.1 (unreleased)
---------------------------
+3.8.1 (unreleased)
+------------------
 
-- Python 2.6 compatability change. Encode strings before calling hmac.new()
+- Python 2.6 compatibility change. Encode strings before calling hmac.new()
   as the function no longer accepts the unicode() type.
 
-version 3.8.0 (2008-12-31)
---------------------------
+3.8.0 (2008-12-31)
+------------------
 
 - Add missing test dependency on ``zope.site`` and
   ``zope.app.publication``.
 
-version 3.7.1 (2008-12-30)
---------------------------
+3.7.1 (2008-12-30)
+------------------
 
 - Specify i18n_domain for titles in apidoc.zcml
 
@@ -23,8 +23,8 @@ version 3.7.1 (2008-12-30)
   work both with ZODB 3.8 and 3.9.
 
 
-version 3.7.0 (2008-10-03)
---------------------------
+3.7.0 (2008-10-03)
+------------------
 
 New features:
 
@@ -33,8 +33,8 @@ New features:
   broken caches handing the same client id out to multiple users. (Of
   course, it doesn't help if caches are broken enough to cache POSTs.)
 
-version 3.6.0 (2008-08-12)
---------------------------
+3.6.0 (2008-08-12)
+------------------
 
 New features:
 
@@ -48,32 +48,32 @@ New features:
   prevent the header from being cached.  This is to minimize risk from
   broken caches handing the same client id out to multiple users. 
 
-version 3.5.2 (2008-06-12)
---------------------------
+3.5.2 (2008-06-12)
+------------------
 
 - Remove ConflictErrors caused on SessionData caused by setting
   ``lastAccessTime``.
 
-Version 3.5.1 (2008-04-30)
---------------------------
+3.5.1 (2008-04-30)
+------------------
 
 - Split up the ZCML to make it possible to re-use more reasonably.
 
 
-Version 3.5.0 (2008-03-11)
---------------------------
+3.5.0 (2008-03-11)
+------------------
 
 - Change the default session "resolution" to a sane value and document/test it.
 
 
-Version 3.4.1 (2007-09-25)
---------------------------
+3.4.1 (2007-09-25)
+------------------
 
 - Fixed some meta data and switch to tgz release.
 
 
-Version 3.4.0 (2007-09-25)
---------------------------
+3.4.0 (2007-09-25)
+------------------
 
 - Initial release
 
