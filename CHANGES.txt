@@ -1,7 +1,12 @@
 CHANGES
 =======
 
-3.8.1 (unreleased)
+3.8.2 (unreleased)
+------------------
+
+- ...
+
+3.8.1 (2009-02-23)
 ------------------
 
 - Add an ability to set cookie effective domain for CookieClientIdManager.
