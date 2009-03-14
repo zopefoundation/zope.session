@@ -19,14 +19,19 @@ import hmac
 import logging
 import random
 import re
-import sha
 import string
 import time
 from cStringIO import StringIO
+try:
+    from hashlib import sha1
+except ImportError:
+    # Python 2.4
+    from sha import new as sha1
 
 import zope.location
 from persistent import Persistent
 from zope import schema, component
+from zope.datetime import rfc1123_date
 from zope.interface import implements
 from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
@@ -34,8 +39,6 @@ from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.i18nmessageid import ZopeMessageFactory as _
 from zope.session.interfaces import IClientIdManager
 from zope.schema.fieldproperty import FieldProperty
-
-from zope.app.http.httpdate import build_http_date
 
 __docformat__ = 'restructuredtext'
 
@@ -251,11 +254,11 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         """
         data = "%.20f%.20f%.20f" % (random.random(), time.time(), time.clock())
-        digest = sha.sha(data).digest()
+        digest = sha1(data).digest()
         s = digestEncode(digest)
         # we store a HMAC of the random value together with it, which makes
         # our session ids unforgeable.
-        mac = hmac.new(s, self.secret, digestmod=sha).digest()
+        mac = hmac.new(s, self.secret, digestmod=sha1).digest()
         return s + digestEncode(mac)
 
     def getRequestId(self, request):
@@ -339,7 +342,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             # call encode() on value s a workaround a bug where the hmac
             # module only accepts str() types in Python 2.6
             if (digestEncode(hmac.new(
-                    s.encode(), self.secret, digestmod=sha
+                    s.encode(), self.secret, digestmod=sha1
                 ).digest()) != mac):
                 return None
             else:
@@ -449,7 +452,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         options = {}
         if self.cookieLifetime is not None:
             if self.cookieLifetime:
-                expires = build_http_date(time.time() + self.cookieLifetime)
+                expires = rfc1123_date(time.time() + self.cookieLifetime)
             else:
                 expires = 'Tue, 19 Jan 2038 00:00:00 GMT'
 

@@ -4,7 +4,12 @@ CHANGES
 3.8.2 (unreleased)
 ------------------
 
-- ...
+- Don't raise deprecation warnings on Python 2.6.
+
+- Drop dependency on zope.app.http, use http-date building function
+  from zope.datetime instead.
+
+- Remove zpkg files and zcml slugs.
 
 3.8.1 (2009-02-23)
 ------------------
