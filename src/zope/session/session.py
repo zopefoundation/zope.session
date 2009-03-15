@@ -31,7 +31,6 @@ import zope.component
 import zope.interface
 from zope.component.interfaces import ComponentLookupError
 from zope.publisher.interfaces import IRequest
-from zope.annotation.interfaces import IAttributeAnnotatable
 
 from zope.session.interfaces import \
         IClientIdManager, IClientId, ISession, ISessionDataContainer, \
@@ -74,7 +73,7 @@ class PersistentSessionDataContainer(zope.location.Location,
     IterableUserDict):
     """A SessionDataContainer that stores data in the ZODB"""
 
-    zope.interface.implements(ISessionDataContainer, IAttributeAnnotatable)
+    zope.interface.implements(ISessionDataContainer)
 
     _v_last_sweep = 0 # Epoch time sweep last run
 

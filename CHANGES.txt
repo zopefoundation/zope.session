@@ -6,6 +6,14 @@ CHANGES
 
 - Don't raise deprecation warnings on Python 2.6.
 
+- Drop dependency on ``zope.annotation``. Instead, we make classes implement
+  `IAttributeAnnotatable` in ZCML configuration, only if ``zope.annotation``
+  is available. If your code relies on annotatable `CookieClientIdManager` 
+  and `PersistentSessionDataContainer` and you don't include the zcml classes
+  configuration of this package, you'll need to use `classImplements` function
+  from ``zope.interface`` to make those classes implement `IAttributeAnnotatable`
+  again.
+
 - Drop dependency on zope.app.http, use http-date building function
   from zope.datetime instead.
 

@@ -63,7 +63,6 @@ setup(name='zope.session',
     install_requires=[
         'setuptools',
         'ZODB3',
-        'zope.annotation',
         'zope.app.appsetup',
         'zope.datetime',
         'zope.component',

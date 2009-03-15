@@ -35,7 +35,6 @@ from zope.datetime import rfc1123_date
 from zope.interface import implements
 from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
-from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.i18nmessageid import ZopeMessageFactory as _
 from zope.session.interfaces import IClientIdManager
 from zope.schema.fieldproperty import FieldProperty
@@ -127,7 +126,7 @@ class ICookieClientIdManager(IClientIdManager):
 class CookieClientIdManager(zope.location.Location, Persistent):
     """Session utility implemented using cookies."""
 
-    implements(IClientIdManager, ICookieClientIdManager, IAttributeAnnotatable)
+    implements(IClientIdManager, ICookieClientIdManager)
 
     thirdparty = FieldProperty(ICookieClientIdManager['thirdparty'])
     cookieLifetime = FieldProperty(ICookieClientIdManager['cookieLifetime'])

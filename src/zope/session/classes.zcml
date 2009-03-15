@@ -6,6 +6,10 @@
   </class>
 
   <class class=".http.CookieClientIdManager">
+    <implements
+        zcml:condition="installed zope.annotation"
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+        />
     <require
         interface=".http.ICookieClientIdManager"
         permission="zope.Public"
@@ -25,6 +29,10 @@
   </class>
 
   <class class=".session.PersistentSessionDataContainer">
+    <implements
+        zcml:condition="installed zope.annotation"
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+        />
     <require
         interface=".interfaces.ISessionDataContainer"
         permission="zope.Public"
