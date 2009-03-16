@@ -27,11 +27,15 @@ try:
 except ImportError:
     # Python 2.4
     from sha import new as sha1
+try:
+    from email.utils import formatdate
+except ImportError:
+    # Python 2.4
+    from email.Utils import formatdate
 
 import zope.location
 from persistent import Persistent
 from zope import schema, component
-from zope.datetime import rfc1123_date
 from zope.interface import implements
 from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
@@ -451,7 +455,8 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         options = {}
         if self.cookieLifetime is not None:
             if self.cookieLifetime:
-                expires = rfc1123_date(time.time() + self.cookieLifetime)
+                expires = formatdate(time.time() + self.cookieLifetime,
+                                     localtime=False, usegmt=True)
             else:
                 expires = 'Tue, 19 Jan 2038 00:00:00 GMT'
 

@@ -56,7 +56,6 @@ setup(name='zope.session',
     install_requires=[
         'setuptools',
         'ZODB3',
-        'zope.datetime',
         'zope.component',
         'zope.i18nmessageid',
         'zope.interface',

@@ -14,8 +14,8 @@ CHANGES
   from ``zope.interface`` to make those classes implement `IAttributeAnnotatable`
   again.
 
-- Drop dependency on zope.app.http, use http-date building function
-  from zope.datetime instead.
+- Drop dependency on zope.app.http, use standard date formatting function
+  from the ``email.utils`` module.
 
 - Zope 3 application bootstrapping code for session utilities was moved into
   zope.app.appsetup package, thus drop dependency on zope.app.appsetup in this
