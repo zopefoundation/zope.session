@@ -17,7 +17,16 @@ CHANGES
 - Drop dependency on zope.app.http, use http-date building function
   from zope.datetime instead.
 
+- Zope 3 application bootstrapping code for session utilities was moved into
+  zope.app.appsetup package, thus drop dependency on zope.app.appsetup in this
+  package. 
+
+- Drop testing dependencies, as we don't need anything behind zope.testing and
+  previous dependencies was simply migrated from zope.app.session before.
+
 - Remove zpkg files and zcml slugs.
+
+- Update package's description a bit.
 
 3.8.1 (2009-02-23)
 ------------------

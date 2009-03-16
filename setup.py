@@ -27,7 +27,7 @@ setup(name='zope.session',
     version = '3.8.2dev',
     author='Zope Corporation and Contributors',
     author_email='zope-dev@zope.org',
-    description='Zope 3 Session Support',
+    description='Client identification and sessions for Zope',
     long_description=(
         read('README.txt')
         + '\n\n.. contents::\n\n' +
@@ -53,17 +53,9 @@ setup(name='zope.session',
     packages=find_packages('src'),
     package_dir = {'': 'src'},
     namespace_packages=['zope',],
-    extras_require = dict(
-        test=['zope.app.testing',
-              'zope.app.publication',
-              'zope.site',
-              'zope.app.zptpage',
-              'zope.app.securitypolicy',
-              'zope.app.zcmlfiles']),
     install_requires=[
         'setuptools',
         'ZODB3',
-        'zope.app.appsetup',
         'zope.datetime',
         'zope.component',
         'zope.i18nmessageid',

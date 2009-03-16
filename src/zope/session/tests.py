@@ -19,8 +19,7 @@ from cStringIO import StringIO
 import unittest, os, os.path
 
 import zope.component
-from zope.testing import doctest
-from zope.app.testing import placelesssetup
+from zope.testing import doctest, cleanup
 import transaction
 
 from zope.component import provideHandler, getGlobalSiteManager
@@ -31,18 +30,12 @@ from zope.session.session import ClientId, Session
 from zope.session.session import PersistentSessionDataContainer
 from zope.session.session import RAMSessionDataContainer
 from zope.session.http import CookieClientIdManager
-from zope.session.bootstrap import bootStrapSubscriber as \
-     sessionBootstrapSubscriber
 
 from zope.publisher.interfaces import IRequest
 from zope.publisher.http import HTTPRequest
 
-from zope.app.appsetup.tests import TestBootstrapSubscriber, EventStub
-from zope.app.appsetup.bootstrap import bootStrapSubscriber
-
-
 def setUp(session_data_container_class=PersistentSessionDataContainer):
-    placelesssetup.setUp()
+    cleanup.setUp()
     zope.component.provideAdapter(ClientId, (IRequest,), IClientId)
     zope.component.provideAdapter(Session, (IRequest,), ISession)
     zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
@@ -53,28 +46,7 @@ def setUp(session_data_container_class=PersistentSessionDataContainer):
     return request
 
 def tearDown():
-    placelesssetup.tearDown()
-
-class TestBootstrap(TestBootstrapSubscriber):
-
-    def test_bootstrapSusbcriber(self):
-        bootStrapSubscriber(EventStub(self.db))
-
-        sessionBootstrapSubscriber(EventStub(self.db))
-
-        import zope.component
-        from zope.app.publication.zopepublication import ZopePublication
-        from zope.site.hooks import setSite
-
-        cx = self.db.open()
-        root = cx.root()
-        root_folder = root[ZopePublication.root_name]
-        setSite(root_folder)
-
-        zope.component.getUtility(IClientIdManager)
-        zope.component.getUtility(ISessionDataContainer)
-
-        cx.close()
+    cleanup.tearDown()
 
 # Test the code in our API documentation is correct
 def test_documentation():
@@ -158,7 +130,6 @@ def testConflicts():
 
 def test_suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(TestBootstrap))
     suite.addTest(doctest.DocTestSuite())
     suite.addTest(doctest.DocTestSuite('zope.session.session',
         tearDown=tearDownTransaction))
