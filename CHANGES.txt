@@ -1,7 +1,12 @@
 CHANGES
 =======
 
-3.9.0 (unreleased)
+3.9.1 (unreleased)
+------------------
+
+- ...
+
+3.9.0 (2009-03-19)
 ------------------
 
 - Don't raise deprecation warnings on Python 2.6.
