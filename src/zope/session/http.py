@@ -26,7 +26,7 @@ try:
     from hashlib import sha1
 except ImportError:
     # Python 2.4
-    from sha import new as sha1
+    import sha as sha1
 try:
     from email.utils import formatdate
 except ImportError:
@@ -257,7 +257,11 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         """
         data = "%.20f%.20f%.20f" % (random.random(), time.time(), time.clock())
-        digest = sha1(data).digest()
+        # BBB code for Python 2.4, inspired by the fallback in hmac
+        if hasattr(sha1, '__call__'):
+            digest = sha1(data).digest()
+        else:
+            digest = sha1.new(data).digest()
         s = digestEncode(digest)
         # we store a HMAC of the random value together with it, which makes
         # our session ids unforgeable.
