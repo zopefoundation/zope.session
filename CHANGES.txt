@@ -1,11 +1,10 @@
 CHANGES
 =======
 
-3.9.1 (unreleased)
+3.9.1 (2009-04-20)
 ------------------
 
 - Restore compatibility with Python 2.4.
-  [hannosch]
 
 3.9.0 (2009-03-19)
 ------------------
