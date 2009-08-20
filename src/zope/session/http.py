@@ -59,7 +59,7 @@ class MissingClientIdException(Exception):
 class ICookieClientIdManager(IClientIdManager):
     """Manages sessions using a cookie"""
 
-    namespace = schema.TextLine(
+    namespace = schema.ASCIILine(
             title=_('Cookie Name'),
             description=_(
                 "Name of cookie used to maintain state. "
@@ -137,10 +137,56 @@ class CookieClientIdManager(zope.location.Location, Persistent):
     secure = FieldProperty(ICookieClientIdManager['secure'])
     postOnly = FieldProperty(ICookieClientIdManager['postOnly'])
     domain = FieldProperty(ICookieClientIdManager['domain'])
+    namespace = FieldProperty(ICookieClientIdManager['namespace'])
 
-    def __init__(self):
-        self.namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
-        self.secret = "%.20f" % random.random()
+    def __init__(self, namespace=None, secret=None):
+        """Create the cookie-based cleint id manager
+        
+        We can pass namespace (cookie name) and/or secret string
+        for generating client unique ids.
+        
+        If we don't pass either of them, they will be generated
+        automatically, this is very handy when storing id manager
+        in the persistent database, so they are saved between
+        application restarts.
+        
+          >>> manager1 = CookieClientIdManager()
+          >>> len(manager1.namespace) > 0
+          True
+          >>> len(manager1.secret) > 0
+          True
+        
+        We can specify cookie name by hand.
+        
+          >>> manager2 = CookieClientIdManager('service_cookie')
+          >>> manager2.namespace
+          'service_cookie'
+        
+        If we want to use CookieClientIdManager object as a non-persistent
+        utility, we need to specify some constant secret, so it won't be
+        recreated on each application restart.
+        
+          >>> manager3 = CookieClientIdManager(secret='some_secret')
+          >>> manager3.secret
+          'some_secret'
+        
+        Of course, we can specify both cookie name and secret.
+        
+          >>> manager4 = CookieClientIdManager('service_cookie', 'some_secret')
+          >>> manager4.namespace
+          'service_cookie'
+          >>> manager4.secret
+          'some_secret'
+        
+        """
+        if namespace is None:
+            namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
+        if secret is None:
+            secret = '%.20f' % random.random()
+        else:
+            secret = str(secret)
+        self.namespace = namespace
+        self.secret = secret
 
     def getClientId(self, request):
         """Get the client id

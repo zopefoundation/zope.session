@@ -4,6 +4,13 @@ CHANGES
 3.9.2 (unreleased)
 ------------------
 
+- Make it possible to construct CookieClientIdManager passing cookie namespace
+  and/or secret as constructor's arguments.
+
+- Use zope.schema.fieldproperty.FieldProperty for "namespace" attribute of
+  CookieClientIdManager, just like for other attributes in its interface.
+  Also, make ICookieClientIdManager's "namespace" field an ASCIILine, so
+  it accepts only non-unicode strings for cookie names. 
 
 3.9.1 (2009-04-20)
 ------------------
