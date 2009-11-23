@@ -29,7 +29,7 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.session',
-    version='3.9.2dev',
+    version='3.9.3',
     author='Zope Corporation and Contributors',
     author_email='zope-dev@zope.org',
     description='Client identification and sessions for Zope',

@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-3.9.2 (unreleased)
+3.9.2 (2009-11-23)
 ------------------
 
 - Fix Python 2.4 hmac compatibility issue by only using hashlib in
