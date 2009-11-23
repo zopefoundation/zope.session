@@ -4,13 +4,19 @@ CHANGES
 3.9.2 (unreleased)
 ------------------
 
+- Fix Python 2.4 hmac compatibility issue by only using hashlib in
+  Python versions 2.5 and above.
+
+- Use the CookieClientIdManager's secret as the hmac key instead of the
+  message when constructing and verifying client ids.
+
 - Make it possible to construct CookieClientIdManager passing cookie namespace
   and/or secret as constructor's arguments.
 
 - Use zope.schema.fieldproperty.FieldProperty for "namespace" attribute of
   CookieClientIdManager, just like for other attributes in its interface.
   Also, make ICookieClientIdManager's "namespace" field an ASCIILine, so
-  it accepts only non-unicode strings for cookie names. 
+  it accepts only non-unicode strings for cookie names.
 
 3.9.1 (2009-04-20)
 ------------------
@@ -24,7 +30,7 @@ CHANGES
 
 - Drop dependency on ``zope.annotation``. Instead, we make classes implement
   `IAttributeAnnotatable` in ZCML configuration, only if ``zope.annotation``
-  is available. If your code relies on annotatable `CookieClientIdManager` 
+  is available. If your code relies on annotatable `CookieClientIdManager`
   and `PersistentSessionDataContainer` and you don't include the zcml classes
   configuration of this package, you'll need to use `classImplements` function
   from ``zope.interface`` to make those classes implement `IAttributeAnnotatable`
@@ -35,7 +41,7 @@ CHANGES
 
 - Zope 3 application bootstrapping code for session utilities was moved into
   zope.app.appsetup package, thus drop dependency on zope.app.appsetup in this
-  package. 
+  package.
 
 - Drop testing dependencies, as we don't need anything behind zope.testing and
   previous dependencies was simply migrated from zope.app.session before.
@@ -93,7 +99,7 @@ New features:
 
 - Only set the client-id cookie if it isn't already set and try to
   prevent the header from being cached.  This is to minimize risk from
-  broken caches handing the same client id out to multiple users. 
+  broken caches handing the same client id out to multiple users.
 
 3.5.2 (2008-06-12)
 ------------------

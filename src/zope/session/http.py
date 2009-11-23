@@ -20,17 +20,15 @@ import logging
 import random
 import re
 import string
+import sys
 import time
 from cStringIO import StringIO
-try:
+
+if sys.version_info[:2] >= (2, 5):
     from hashlib import sha1
-except ImportError:
-    # Python 2.4
-    import sha as sha1
-try:
     from email.utils import formatdate
-except ImportError:
-    # Python 2.4
+else:
+    import sha as sha1
     from email.Utils import formatdate
 
 import zope.location
@@ -141,43 +139,43 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
     def __init__(self, namespace=None, secret=None):
         """Create the cookie-based cleint id manager
-        
+
         We can pass namespace (cookie name) and/or secret string
         for generating client unique ids.
-        
+
         If we don't pass either of them, they will be generated
         automatically, this is very handy when storing id manager
         in the persistent database, so they are saved between
         application restarts.
-        
+
           >>> manager1 = CookieClientIdManager()
           >>> len(manager1.namespace) > 0
           True
           >>> len(manager1.secret) > 0
           True
-        
+
         We can specify cookie name by hand.
-        
+
           >>> manager2 = CookieClientIdManager('service_cookie')
           >>> manager2.namespace
           'service_cookie'
-        
+
         If we want to use CookieClientIdManager object as a non-persistent
         utility, we need to specify some constant secret, so it won't be
         recreated on each application restart.
-        
+
           >>> manager3 = CookieClientIdManager(secret='some_secret')
           >>> manager3.secret
           'some_secret'
-        
+
         Of course, we can specify both cookie name and secret.
-        
+
           >>> manager4 = CookieClientIdManager('service_cookie', 'some_secret')
           >>> manager4.namespace
           'service_cookie'
           >>> manager4.secret
           'some_secret'
-        
+
         """
         if namespace is None:
             namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
@@ -228,7 +226,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         An exception to this is if the cookieLifetime is set to a
         non-zero integer value, in which case we do set it on every
         request, regardless of when it was last set:
-        
+
           >>> bim.cookieLifetime = 3600 # one hour
           >>> id == bim.getClientId(request2)
           True
@@ -248,12 +246,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
           >>> print request.response.getCookie(bim.namespace)
           None
-        
+
           >>> request = HTTPRequest(StringIO(''), {'REQUEST_METHOD': 'POST'})
           >>> id = bim.getClientId(request)
           >>> id == bim.getClientId(request)
           True
-          
+
           >>> request.response.getCookie(bim.namespace) is not None
           True
 
@@ -311,7 +309,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         s = digestEncode(digest)
         # we store a HMAC of the random value together with it, which makes
         # our session ids unforgeable.
-        mac = hmac.new(s, self.secret, digestmod=sha1).digest()
+        mac = hmac.new(self.secret, s, digestmod=sha1).digest()
         return s + digestEncode(mac)
 
     def getRequestId(self, request):
@@ -361,7 +359,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.setRequestId(request, id_uni)
           >>> bim.getRequestId(request) == id_uni
           True
-        
+
         If another server is managing the ClientId cookies (Apache, Nginx)
         we're returning their value without checking:
 
@@ -371,7 +369,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> request3._cookies = {'uid': 'AQAAf0Y4gjgAAAQ3AwMEAg=='}
           >>> bim.getRequestId(request3)
           'AQAAf0Y4gjgAAAQ3AwMEAg=='
-        
+
         """
         response_cookie = request.response.getCookie(self.namespace)
         if response_cookie:
@@ -382,7 +380,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if self.thirdparty:
             return sid
         else:
-            
+
             # If there is an id set on the response, use that but
             # don't trust it.  We need to check the response in case
             # there has already been a new session created during the
@@ -391,11 +389,11 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             if sid is None or len(sid) != 54:
                 return None
             s, mac = sid[:27], sid[27:]
-            
+
             # call encode() on value s a workaround a bug where the hmac
             # module only accepts str() types in Python 2.6
             if (digestEncode(hmac.new(
-                    s.encode(), self.secret, digestmod=sha1
+                    self.secret, s.encode(), digestmod=sha1
                 ).digest()) != mac):
                 return None
             else:
@@ -460,7 +458,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         If the secure attribute is set to a true value, then the
         secure cookie option is included.
-        
+
           >>> bim.thirdparty = False
           >>> bim.cookieLifetime = None
           >>> request = HTTPRequest(StringIO(''), {}, None)
