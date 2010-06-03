@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Session implementation
-
-$Id$
 """
 from cStringIO import StringIO
 import time, string, random, thread

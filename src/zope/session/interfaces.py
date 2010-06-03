@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Interfaces for session utility.
-
-$Id$
 """
 from zope.interface import Interface
 from zope.interface.common.mapping import IMapping, IReadMapping, IWriteMapping

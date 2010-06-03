@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Session tests
-
-$Id$
 """
 from cStringIO import StringIO
 import unittest, os, os.path

@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Session implementation using cookies
-
-$Id$
 """
 import hmac
 import logging
