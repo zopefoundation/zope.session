@@ -4,6 +4,11 @@ CHANGES
 3.9.3 (unreleased)
 ------------------
 
+- Added test extra to declare test dependency on ``zope.testing``.
+
+- Using Python's ``doctest`` module instead of depreacted
+  ``zope.testing.doctest``.
+
 
 3.9.2 (2009-11-23)
 ------------------

@@ -14,11 +14,13 @@
 """Session tests
 """
 from cStringIO import StringIO
-import unittest, os, os.path
-
-import zope.component
-from zope.testing import doctest, cleanup
+from zope.testing import cleanup
+import doctest
+import os
+import os.path
 import transaction
+import unittest
+import zope.component
 
 from zope.component import provideHandler, getGlobalSiteManager
 from zope.session.interfaces import IClientId, IClientIdManager, ISession

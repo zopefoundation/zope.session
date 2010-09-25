@@ -66,6 +66,10 @@ setup(name='zope.session',
         'zope.publisher',
         'zope.minmax',
         ],
+    extras_require=dict(
+          test=[
+              'zope.testing',
+              ]),
     include_package_data = True,
     zip_safe = False,
     )
