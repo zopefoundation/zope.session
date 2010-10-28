@@ -109,11 +109,13 @@ class ISession(Interface):
         given product id, determining the client id, and returning the
         relevant ISessionPkgData.
 
+        Caution: This method implicitly creates a new session for the user
+                 when it does not exist yet.
+
         """
 
     def get(product_id, default=None):
-        """Return the relevant ISessionPkgData or default if not
-        available"""
+        """Return the relevant ISessionPkgData or default if not available."""
 
 
 class ISessionData(IReadMapping, IMapping):
