@@ -2,7 +2,8 @@
 
   <adapter
       factory=".session.ClientId"
-      permission="zope.Public" 
+      provides=".interfaces.IClientId"
+      permission="zope.Public"
       />
 
   <adapter

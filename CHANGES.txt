@@ -4,7 +4,10 @@ CHANGES
 3.9.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added an explicit `provides` to the IClientId adapter declaration in
+  adapter.zcml.
+
+- ...
 
 
 3.9.3 (2010-09-25)
@@ -33,10 +36,12 @@ CHANGES
   Also, make ICookieClientIdManager's "namespace" field an ASCIILine, so
   it accepts only non-unicode strings for cookie names.
 
+
 3.9.1 (2009-04-20)
 ------------------
 
 - Restore compatibility with Python 2.4.
+
 
 3.9.0 (2009-03-19)
 ------------------
@@ -65,6 +70,7 @@ CHANGES
 
 - Update package's description a bit.
 
+
 3.8.1 (2009-02-23)
 ------------------
 
@@ -75,11 +81,13 @@ CHANGES
 - Python 2.6 compatibility change. Encode strings before calling hmac.new()
   as the function no longer accepts the unicode() type.
 
+
 3.8.0 (2008-12-31)
 ------------------
 
 - Add missing test dependency on ``zope.site`` and
   ``zope.app.publication``.
+
 
 3.7.1 (2008-12-30)
 ------------------
@@ -101,6 +109,7 @@ New features:
   broken caches handing the same client id out to multiple users. (Of
   course, it doesn't help if caches are broken enough to cache POSTs.)
 
+
 3.6.0 (2008-08-12)
 ------------------
 
@@ -116,11 +125,13 @@ New features:
   prevent the header from being cached.  This is to minimize risk from
   broken caches handing the same client id out to multiple users.
 
+
 3.5.2 (2008-06-12)
 ------------------
 
 - Remove ConflictErrors caused on SessionData caused by setting
   ``lastAccessTime``.
+
 
 3.5.1 (2008-04-30)
 ------------------
