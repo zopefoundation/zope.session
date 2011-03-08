@@ -1,13 +1,14 @@
 CHANGES
 =======
 
-3.9.4 (unreleased)
+3.9.4 (2011-03-07)
 ------------------
 
 - Added an explicit `provides` to the IClientId adapter declaration in
   adapter.zcml.
 
-- ...
+- Added option to disable implicit sweeps in
+  PersistentSessionDataContainer.
 
 
 3.9.3 (2010-09-25)

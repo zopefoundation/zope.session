@@ -74,6 +74,7 @@ class PersistentSessionDataContainer(zope.location.Location,
     zope.interface.implements(ISessionDataContainer)
 
     _v_last_sweep = 0 # Epoch time sweep last run
+    disable_implicit_sweeps = False
 
     def __init__(self):
         self.data = OOBTree()
@@ -102,6 +103,35 @@ class PersistentSessionDataContainer(zope.location.Location,
             Traceback (most recent call last):
                 [...]
             KeyError: 'clientid'
+
+        Can you disable the automatic removal of stale data.
+
+            >>> sdc.disable_implicit_sweeps = True
+            >>> sdc['stale'] = stale = SessionData()
+
+        Now we try the same method of winding back the clock.
+
+            >>> stale.setLastAccessTime(sd.getLastAccessTime() - 64)
+            >>> sdc._v_last_sweep = sdc._v_last_sweep - 4
+
+        But the data is not automatically removed.
+
+            >>> sdc['stale'] #doctest: +ELLIPSIS
+            <zope.session.session.SessionData object at ...>
+
+        We can manually remove stale data by calling sweep() if stale
+        data isn't being automatically removed.
+
+            >>> stale.setLastAccessTime(sd.getLastAccessTime() - 64)
+            >>> sdc.sweep()
+            >>> sdc['stale']
+            Traceback (most recent call last):
+                [...]
+            KeyError: 'stale'
+
+        Now we turn automatic removal back on.
+
+            >>> sdc.disable_implicit_sweeps = False
 
         Ensure the lastAccessTime on the ISessionData is being updated
         occasionally. The ISessionDataContainer maintains this whenever
@@ -202,7 +232,8 @@ class PersistentSessionDataContainer(zope.location.Location,
             except AttributeError:
                 pass
 
-        if self._v_last_sweep + self.resolution < now:
+        if (self._v_last_sweep + self.resolution < now and
+            not self.disable_implicit_sweeps):
             self.sweep()
             if getattr(self, '_v_old_sweep', None) is None:
                 self._v_old_sweep = self._v_last_sweep
