@@ -4,7 +4,9 @@ CHANGES
 3.9.5 (unreleased)
 ------------------
 
-- No changes yet
+- Fix a bug in zope.session.session.Session that would trigger an
+  infinite loop if either iteration or a containment test were
+  attempted on an instance.
 
 
 3.9.4 (2011-03-07)

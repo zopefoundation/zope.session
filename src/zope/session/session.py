@@ -470,6 +470,10 @@ class Session(object):
             return spd
 
 
+    def __iter__(self):
+        raise NotImplementedError
+
+
 class SessionData(persistent.Persistent, IterableUserDict):
     """See zope.session.interfaces.ISessionData
 

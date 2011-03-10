@@ -127,6 +127,33 @@ def testConflicts():
     Q.E.D.
     """
 
+def testSessionIterationBug():
+    """
+
+    The zope.session.session.Session ISession implementation defines
+    an `__iter__` method that raises NotImplementedError in order to
+    avoid an infinite loop if iteration or a test for containment is
+    attempted on an instance.
+
+    >>> import zope.session.session
+    >>> request = setUp()
+    >>> session = zope.session.session.Session(request)
+    >>> try:
+    ...     "blah" in session
+    ... except TypeError:
+    ...     pass
+    ... else:
+    ...     raise Exception("Should have raised TypeError")
+
+    >>> for i in session:
+    ...     raise Exception("Should have raised NotImplementedError")
+    Traceback (most recent call last):
+    ...
+    NotImplementedError
+
+    >>> tearDown()
+    """
+
 
 def test_suite():
     suite = unittest.TestSuite()
