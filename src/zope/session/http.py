@@ -123,6 +123,13 @@ class ICookieClientIdManager(IClientIdManager):
         default=False,
         )
 
+    httpOnly = schema.Bool(
+        title=_('The cookie cannot be accessed through client side scripts'),
+        required=False,
+        default=False,
+        )
+
+
 class CookieClientIdManager(zope.location.Location, Persistent):
     """Session utility implemented using cookies."""
 
@@ -134,6 +141,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
     postOnly = FieldProperty(ICookieClientIdManager['postOnly'])
     domain = FieldProperty(ICookieClientIdManager['domain'])
     namespace = FieldProperty(ICookieClientIdManager['namespace'])
+    httpOnly = FieldProperty(ICookieClientIdManager['httpOnly'])
 
     def __init__(self, namespace=None, secret=None):
         """Create the cookie-based cleint id manager
@@ -482,6 +490,16 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> request.response.getHeader('Expires')
           'Mon, 26 Jul 1997 05:00:00 GMT'
 
+        If the httpOnly attribute is set to a true value, then the
+        HttpOnly cookie option is included.
+
+          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> bim.secure = False
+          >>> bim.httpOnly = True
+          >>> bim.setRequestId(request, '1234')
+          >>> print request.response.getCookie(bim.namespace)
+          {'path': '/', 'domain': u'.example.org', 'value': '1234', 'httponly': True}
+
         """
         # TODO: Currently, the path is the ApplicationURL. This is reasonable,
         #     and will be adequate for most purposes.
@@ -513,6 +531,9 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         if self.domain:
             options['domain'] = self.domain
+
+        if self.httpOnly:
+            options['HttpOnly'] = True
 
         response.setCookie(
             self.namespace, id,
