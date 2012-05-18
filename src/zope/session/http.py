@@ -32,7 +32,7 @@ else:
 import zope.location
 from persistent import Persistent
 from zope import schema, component
-from zope.interface import implements
+from zope.interface import implementer
 from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
 from zope.i18nmessageid import ZopeMessageFactory as _
@@ -130,10 +130,10 @@ class ICookieClientIdManager(IClientIdManager):
         )
 
 
+@implementer(IClientIdManager, ICookieClientIdManager)
 class CookieClientIdManager(zope.location.Location, Persistent):
     """Session utility implemented using cookies."""
 
-    implements(IClientIdManager, ICookieClientIdManager)
 
     thirdparty = FieldProperty(ICookieClientIdManager['thirdparty'])
     cookieLifetime = FieldProperty(ICookieClientIdManager['cookieLifetime'])
@@ -551,8 +551,8 @@ def notifyVirtualHostChanged(event):
     setRequestId if a cookie is present in the response for that manager. To
     demonstrate we create a dummy manager object and event:
 
-        >>> class DummyManager(object):
-        ...     implements(ICookieClientIdManager)
+        >>> @implementer(ICookieClientIdManager)
+        ... class DummyManager(object):
         ...     namespace = 'foo'
         ...     thirdparty = False
         ...     request_id = None
