@@ -13,9 +13,8 @@
 ##############################################################################
 """Session implementation
 """
-from cStringIO import StringIO
-import time, string, random, thread
-from UserDict import IterableUserDict
+import random
+import time
 from heapq import heapify, heappop
 
 import ZODB
@@ -34,21 +33,54 @@ from zope.session.interfaces import \
         IClientIdManager, IClientId, ISession, ISessionDataContainer, \
         ISessionPkgData, ISessionData
 
-__docformat__ = 'restructuredtext'
+try:
+    from cStringIO import StringIO
+except ImportError:
+    # Py3: Now StringIO location.
+    from io import StringIO
 
-cookieSafeTrans = string.maketrans("+/", "-.")
+try:
+    from UserDict import IterableUserDict as UserDict
+except ImportError:
+    # Py3: Now StringIO location.
+    from collections import UserDict
+
+try:
+    from base64 import encodebytes
+except ImportError:
+    # Py3: Python 2 only has encodestring
+    from base64 import encodestring as encodebytes
+
+try:
+    from threading import get_ident
+except ImportError:
+    # Py3: Python 2 has a different location.
+    from thread import get_ident
+
+try:
+    unicode
+except NameError:
+    # Py3: Define unicode
+    unicode = str
+
+try:
+    transtable = bytes.maketrans(b'+/', b'-.')
+except AttributeError:
+    # Py3: Python 2 has a differnt location for maketrans.
+    import string
+    transtable = string.maketrans(b'+/', b'-.')
 
 def digestEncode(s):
     """Encode SHA digest for cookie."""
-    return s.encode("base64")[:-2].translate(cookieSafeTrans)
+    return encodebytes(s)[:-2].translate(transtable)
 
 
 @zope.interface.implementer(IClientId)
 @zope.component.adapter(IRequest)
-class ClientId(str):
+class ClientId(unicode):
     """See zope.session.interfaces.IClientId
 
-        >>> import tests
+        >>> from zope.session import tests
         >>> request = tests.setUp()
 
         >>> id1 = ClientId(request)
@@ -61,15 +93,14 @@ class ClientId(str):
     """
 
     def __new__(cls, request):
-        return str.__new__(cls,
+        return unicode.__new__(cls,
             zope.component.getUtility(IClientIdManager).getClientId(request)
             )
 
 
 @zope.interface.implementer(ISessionDataContainer)
-class PersistentSessionDataContainer(zope.location.Location,
-    persistent.Persistent,
-    IterableUserDict):
+class PersistentSessionDataContainer(
+    zope.location.Location, persistent.Persistent, UserDict):
     """A SessionDataContainer that stores data in the ZODB"""
 
 
@@ -116,8 +147,8 @@ class PersistentSessionDataContainer(zope.location.Location,
 
         But the data is not automatically removed.
 
-            >>> sdc['stale'] #doctest: +ELLIPSIS
-            <zope.session.session.SessionData object at ...>
+            >>> sdc['stale'] is stale
+            True
 
         We can manually remove stale data by calling sweep() if stale
         data isn't being automatically removed.
@@ -214,7 +245,7 @@ class PersistentSessionDataContainer(zope.location.Location,
 
         """
         if self.timeout == 0:
-            return IterableUserDict.__getitem__(self, pkg_id)
+            return UserDict.__getitem__(self, pkg_id)
 
         now = time.time()
 
@@ -239,7 +270,7 @@ class PersistentSessionDataContainer(zope.location.Location,
                 self._v_old_sweep = self._v_last_sweep
             self._v_last_sweep = now
 
-        rv = IterableUserDict.__getitem__(self, pkg_id)
+        rv = UserDict.__getitem__(self, pkg_id)
         # Only update the lastAccessTime once every few minutes, rather than
         # every hit, to avoid ZODB bloat and conflicts
         if rv.getLastAccessTime() + self.resolution < now:
@@ -267,7 +298,7 @@ class PersistentSessionDataContainer(zope.location.Location,
 
         """
         session_data.setLastAccessTime(int(time.time()))
-        return IterableUserDict.__setitem__(self, pkg_id, session_data)
+        return UserDict.__setitem__(self, pkg_id, session_data)
 
     def sweep(self):
         """Clean out stale data
@@ -334,12 +365,12 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
     def _getData(self):
 
         # Open a connection to _ram_storage per thread
-        tid = thread.get_ident()
-        if not self._conns.has_key(tid):
+        tid = get_ident()
+        if tid not in self._conns:
             self._conns[tid] = self._ram_db.open()
 
         root = self._conns[tid].root()
-        if not root.has_key(self.key):
+        if self.key not in root:
             root[self.key] = OOBTree()
         return root[self.key]
 
@@ -370,7 +401,7 @@ class Session(object):
 
         """See zope.session.interfaces.ISession
 
-            >>> import tests
+            >>> from zope.session import tests
             >>> request = tests.setUp(PersistentSessionDataContainer)
 
            If we use get we get None or default returned if the pkg_id
@@ -414,7 +445,7 @@ class Session(object):
     def __getitem__(self, pkg_id):
         """See zope.session.interfaces.ISession
 
-            >>> import tests
+            >>> from zope.session import tests
             >>> request = tests.setUp(PersistentSessionDataContainer)
             >>> request2 = tests.HTTPRequest(StringIO(''), {}, None)
 
@@ -475,7 +506,7 @@ class Session(object):
 
 
 @zope.interface.implementer(ISessionData)
-class SessionData(persistent.Persistent, IterableUserDict):
+class SessionData(persistent.Persistent, UserDict):
     """See zope.session.interfaces.ISessionData
 
         >>> session = SessionData()
@@ -553,7 +584,7 @@ class SessionData(persistent.Persistent, IterableUserDict):
 
 
 @zope.interface.implementer(ISessionPkgData)
-class SessionPkgData(persistent.Persistent, IterableUserDict):
+class SessionPkgData(persistent.Persistent, UserDict):
     """See zope.session.interfaces.ISessionPkgData
 
         >>> session = SessionPkgData()

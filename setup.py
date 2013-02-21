@@ -18,16 +18,14 @@
 ##############################################################################
 """Setup for zope.session package
 """
-
 import os
-
 from setuptools import setup, find_packages
 
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.session',
-    version='4.0.0dev',
+    version='4.0.0a1.dev',
     author='Zope Foundation and Contributors',
     author_email='zope-dev@zope.org',
     description='Client identification and sessions for Zope',
@@ -51,6 +49,9 @@ setup(name='zope.session',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: Implementation :: CPython',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Topic :: Internet :: WWW/HTTP',
@@ -61,18 +62,19 @@ setup(name='zope.session',
     namespace_packages=['zope',],
     install_requires=[
         'setuptools',
-        'ZODB3',
+        'ZODB',
         'zope.component',
         'zope.i18nmessageid >= 3.4.2',
         'zope.interface',
         'zope.location',
-        'zope.publisher',
+        'zope.publisher >= 4.0.0a1',
         'zope.minmax',
         ],
     extras_require=dict(
-          test=[
-              'zope.testing',
-              ]),
+          test=['zope.testing',],
+          ),
+    tests_require = ['zope.testing',],
+    test_suite = 'zope.session.tests.test_suite',
     include_package_data = True,
     zip_safe = False,
     )

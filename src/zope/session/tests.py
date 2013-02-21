@@ -13,16 +13,20 @@
 ##############################################################################
 """Session tests
 """
-from cStringIO import StringIO
 from zope.testing import cleanup
 import doctest
 import os
 import os.path
+import re
 import transaction
 import unittest
 import zope.component
 
 from zope.component import provideHandler, getGlobalSiteManager
+from zope.publisher.interfaces import IRequest
+from zope.publisher.http import HTTPRequest
+from zope.testing import renormalizing
+
 from zope.session.interfaces import IClientId, IClientIdManager, ISession
 from zope.session.interfaces import ISessionDataContainer
 from zope.session.interfaces import ISessionPkgData, ISessionData
@@ -31,8 +35,29 @@ from zope.session.session import PersistentSessionDataContainer
 from zope.session.session import RAMSessionDataContainer
 from zope.session.http import CookieClientIdManager
 
-from zope.publisher.interfaces import IRequest
-from zope.publisher.http import HTTPRequest
+try:
+    from cStringIO import StringIO
+except ImportError:
+    # Py3: Now StringIO location.
+    from io import StringIO
+
+
+checker = renormalizing.RENormalizing([
+    # Python 3 strings remove the "u".
+    (re.compile("u('.*?')"),
+     r"\1"),
+    (re.compile('u(".*?")'),
+     r"\1"),
+    # Python 3 bytes add a "b".
+    (re.compile("b('.*?')"),
+     r"\1"),
+    (re.compile('b(".*?")'),
+     r"\1"),
+    # Python 3 adds module name to exceptions.
+    (re.compile("zope.session.http.MissingClientIdException"),
+     r"MissingClientIdException"),
+    ])
+
 
 def setUp(session_data_container_class=PersistentSessionDataContainer):
     cleanup.setUp()
@@ -157,11 +182,15 @@ def testSessionIterationBug():
 
 def test_suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite())
-    suite.addTest(doctest.DocTestSuite('zope.session.session',
-        tearDown=tearDownTransaction))
-    suite.addTest(doctest.DocTestSuite('zope.session.http',
-        optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,)
+    suite.addTest(doctest.DocTestSuite(
+            checker=checker,
+            optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,))
+    suite.addTest(doctest.DocTestSuite(
+            'zope.session.session', checker=checker,
+            tearDown=tearDownTransaction))
+    suite.addTest(doctest.DocTestSuite(
+            'zope.session.http', checker=checker,
+            optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,)
         )
     return suite
 

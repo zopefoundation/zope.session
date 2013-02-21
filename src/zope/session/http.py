@@ -17,17 +17,9 @@ import hmac
 import logging
 import random
 import re
-import string
-import sys
 import time
-from cStringIO import StringIO
-
-if sys.version_info[:2] >= (2, 5):
-    from hashlib import sha1
-    from email.utils import formatdate
-else:
-    import sha as sha1
-    from email.Utils import formatdate
+from hashlib import sha1
+from email.utils import formatdate
 
 import zope.location
 from persistent import Persistent
@@ -36,18 +28,18 @@ from zope.interface import implementer
 from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
 from zope.i18nmessageid import ZopeMessageFactory as _
-from zope.session.interfaces import IClientIdManager
 from zope.schema.fieldproperty import FieldProperty
 
-__docformat__ = 'restructuredtext'
+from zope.session.interfaces import IClientIdManager
+from zope.session.session import digestEncode
 
-cookieSafeTrans = string.maketrans("+/", "-.")
+try:
+    from cStringIO import StringIO
+except ImportError:
+    # Py3: Now StringIO location.
+    from io import StringIO
 
 logger = logging.getLogger()
-
-def digestEncode(s):
-    """Encode SHA digest for cookie."""
-    return s.encode("base64")[:-2].translate(cookieSafeTrans)
 
 class MissingClientIdException(Exception):
     """No ClientId found in Request"""
@@ -186,9 +178,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if namespace is None:
             namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
         if secret is None:
-            secret = '%.20f' % random.random()
-        else:
-            secret = str(secret)
+            secret = u'%.20f' % random.random()
         self.namespace = namespace
         self.secret = secret
 
@@ -220,7 +210,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         an IClientId. This is because this method is used to implement
         the IClientId Adapter.
 
-          >>> type(id) == type('')
+          >>> type(id) == type(u'')
           True
 
         We don't set the client id unless we need to, so, for example,
@@ -250,7 +240,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           ...
           MissingClientIdException
 
-          >>> print request.response.getCookie(bim.namespace)
+          >>> print(request.response.getCookie(bim.namespace))
           None
 
           >>> request = HTTPRequest(StringIO(''), {'REQUEST_METHOD': 'POST'})
@@ -275,7 +265,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           ...
           MissingClientIdException
 
-          >>> print request.response.getCookie(bim.namespace)
+          >>> print(request.response.getCookie(bim.namespace))
           None
 
         """
@@ -307,16 +297,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         """
         data = "%.20f%.20f%.20f" % (random.random(), time.time(), time.clock())
-        # BBB code for Python 2.4, inspired by the fallback in hmac
-        if hasattr(sha1, '__call__'):
-            digest = sha1(data).digest()
-        else:
-            digest = sha1.new(data).digest()
+        digest = sha1(data.encode()).digest()
         s = digestEncode(digest)
         # we store a HMAC of the random value together with it, which makes
         # our session ids unforgeable.
-        mac = hmac.new(self.secret, s, digestmod=sha1).digest()
-        return s + digestEncode(mac)
+        mac = hmac.new(self.secret.encode(), s, digestmod=sha1).digest()
+        return (s + digestEncode(mac)).decode()
 
     def getRequestId(self, request):
         """Return the browser id encoded in request as a string
@@ -361,7 +347,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         Test a corner case where Python 2.6 hmac module does not allow
         unicode as input:
 
-          >>> id_uni = unicode(bim.generateUniqueId())
+          >>> id_uni = bim.generateUniqueId()
           >>> bim.setRequestId(request, id_uni)
           >>> bim.getRequestId(request) == id_uni
           True
@@ -399,8 +385,8 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             # call encode() on value s a workaround a bug where the hmac
             # module only accepts str() types in Python 2.6
             if (digestEncode(hmac.new(
-                    self.secret, s.encode(), digestmod=sha1
-                ).digest()) != mac):
+                    self.secret.encode(), s.encode(), digestmod=sha1
+                ).digest()).decode() != mac):
                 return None
             else:
                 return sid
@@ -430,7 +416,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         By default, session cookies don't expire:
 
-            >>> cookie.has_key('expires')
+            >>> 'expires' in cookie
             False
 
         Expiry time of 0 means never (well - close enough)
@@ -448,8 +434,8 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             >>> request = HTTPRequest(StringIO(''), {}, None)
             >>> bid = bim.getClientId(request)
             >>> cookie = request.response.getCookie(bim.namespace)
-            >>> import rfc822
-            >>> expires = time.mktime(rfc822.parsedate(cookie['expires']))
+            >>> import email.utils
+            >>> expires = time.mktime(email.utils.parsedate(cookie['expires']))
             >>> expires > time.mktime(time.gmtime()) + 55*60
             True
 
@@ -470,15 +456,17 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> request = HTTPRequest(StringIO(''), {}, None)
           >>> bim.secure = True
           >>> bim.setRequestId(request, '1234')
-          >>> print request.response.getCookie(bim.namespace)
+          >>> from pprint import pprint
+          >>> pprint(request.response.getCookie(bim.namespace))
           {'path': '/', 'secure': True, 'value': '1234'}
 
         If the domain is specified, it will be set as a cookie attribute.
 
           >>> bim.domain = u'.example.org'
           >>> bim.setRequestId(request, '1234')
-          >>> print request.response.getCookie(bim.namespace)
-          {'path': '/', 'domain': u'.example.org', 'secure': True, 'value': '1234'}
+          >>> pprint(request.response.getCookie(bim.namespace))
+          {'domain': '.example.org', 'path': '/', 'secure': True,
+           'value': '1234'}
 
         When the cookie is set, cache headers are added to the
         response to try to prevent the cookie header from being cached:
@@ -497,8 +485,9 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.secure = False
           >>> bim.httpOnly = True
           >>> bim.setRequestId(request, '1234')
-          >>> print request.response.getCookie(bim.namespace)
-          {'path': '/', 'domain': u'.example.org', 'value': '1234', 'httponly': True}
+          >>> pprint(request.response.getCookie(bim.namespace))
+          {'domain': '.example.org', 'httponly': True, 'path': '/',
+           'value': '1234'}
 
         """
         # TODO: Currently, the path is the ApplicationURL. This is reasonable,
