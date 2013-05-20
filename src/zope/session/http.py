@@ -435,8 +435,11 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             >>> bid = bim.getClientId(request)
             >>> cookie = request.response.getCookie(bim.namespace)
             >>> import email.utils
-            >>> expires = time.mktime(email.utils.parsedate(cookie['expires']))
-            >>> expires > time.mktime(time.gmtime()) + 55*60
+            >>> c_expires = email.utils.parsedate(cookie['expires'])
+            >>> from datetime import datetime, timedelta
+            >>> expires = datetime(*c_expires[:7])
+            >>> now = datetime.now()
+            >>> expires > now + timedelta(0, 55 * 60)
             True
 
         If another server in front of Zope (Apache, Nginx) is managing the
