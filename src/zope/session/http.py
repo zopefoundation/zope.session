@@ -438,8 +438,8 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             >>> c_expires = email.utils.parsedate(cookie['expires'])
             >>> from datetime import datetime, timedelta
             >>> expires = datetime(*c_expires[:7])
-            >>> now = datetime.now()
-            >>> expires > now + timedelta(0, 55 * 60)
+            >>> now = datetime.utcnow()
+            >>> expires > now + timedelta(minutes=55)
             True
 
         If another server in front of Zope (Apache, Nginx) is managing the
