@@ -13,13 +13,16 @@
 ##############################################################################
 """Session tests
 """
-from zope.testing import cleanup
 import doctest
 import os
 import os.path
 import re
 import transaction
 import unittest
+import tempfile
+import shutil
+
+from zope.testing import cleanup
 import zope.component
 
 from zope.component import provideHandler, getGlobalSiteManager
@@ -105,10 +108,12 @@ def testConflicts():
     ...     from ZODB.DB import DB
     ...     from ZODB.tests.util import ConflictResolvingMappingStorage
     ...     db = DB(ConflictResolvingMappingStorage())
+    ...     tmpdir = None
     ... except ImportError:
     ...     # ZODB 3.9 (ConflictResolvingMappingStorage no longer exists)
     ...     import ZODB.DB
-    ...     db = ZODB.DB('Data.fs')
+    ...     tmpdir = tempfile.mkdtemp(prefix='zope.session-', suffix='-test')
+    ...     db = ZODB.DB(os.path.join(tmpdir, 'Data.fs'))
     >>> from zope.session.session import (
     ...     PersistentSessionDataContainer, SessionData)
     >>> import transaction
@@ -150,6 +155,8 @@ def testConflicts():
     >>> tm_B.commit()
 
     Q.E.D.
+
+    >>> if tmpdir: shutil.rmtree(tmpdir)
     """
 
 def testSessionIterationBug():
