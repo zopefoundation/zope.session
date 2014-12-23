@@ -1,2 +1,11 @@
-*.egg-info
-*.pyc
+*.egg-info/
+*.py[co]
+.installed.cfg
+Data.fs*
+__pycache__/
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+parts/
