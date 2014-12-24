@@ -1,10 +1,10 @@
 CHANGES
 =======
 
-4.0.0a3 (unreleased)
---------------------
+4.0.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Add support for testing on Travis.
 
 
 4.0.0a2 (2013-08-27)
@@ -16,15 +16,15 @@ CHANGES
 4.0.0a1 (2013-02-21)
 --------------------
 
-- Added support for Python 3.3
+- Add support for Python 3.3
 
-- Replaced deprecated ``zope.component.adapts`` usage with equivalent
+- Replace deprecated ``zope.component.adapts`` usage with equivalent
   ``zope.component.adapter`` decorator.
 
-- Replaced deprecated ``zope.interface.implements`` usage with equivalent
+- Replace deprecated ``zope.interface.implements`` usage with equivalent
   ``zope.interface.implementer`` decorator.
 
-- Dropped support for Python 2.4 and 2.5.
+- Drop support for Python 2.4 and 2.5.
 
 
 3.9.5 (2011-08-11)
@@ -40,19 +40,19 @@ CHANGES
 3.9.4 (2011-03-07)
 ------------------
 
-- Added an explicit `provides` to the IClientId adapter declaration in
+- Add an explicit `provides` to the IClientId adapter declaration in
   adapter.zcml.
 
-- Added option to disable implicit sweeps in
+- Add option to disable implicit sweeps in
   PersistentSessionDataContainer.
 
 
 3.9.3 (2010-09-25)
 ------------------
 
-- Added test extra to declare test dependency on ``zope.testing``.
+- Add test extra to declare test dependency on ``zope.testing``.
 
-- Using Python's ``doctest`` module instead of depreacted
+- Use Python's ``doctest`` module instead of depreacted
   ``zope.testing.doctest``.
 
 

@@ -26,7 +26,7 @@ def read(*rnames):
         return f.read()
 
 setup(name='zope.session',
-    version='4.0.0a3.dev0',
+    version='4.0.0.dev0',
     author='Zope Foundation and Contributors',
     author_email='zope-dev@zope.org',
     description='Client identification and sessions for Zope',
