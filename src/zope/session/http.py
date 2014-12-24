@@ -184,7 +184,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
           >>> from io import StringIO
           >>> from zope.publisher.http import HTTPRequest
-          >>> request = HTTPRequest(StringIO(''), {})
+          >>> request = HTTPRequest(StringIO(), {})
           >>> bim = CookieClientIdManager()
           >>> id = bim.getClientId(request)
           >>> id == bim.getClientId(request)
@@ -192,7 +192,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         The id is retained accross requests:
 
-          >>> request2 = HTTPRequest(StringIO(''), {})
+          >>> request2 = HTTPRequest(StringIO(), {})
           >>> request2._cookies = dict(
           ...   [(name, cookie['value'])
           ...    for (name, cookie) in request.response._cookies.items()
@@ -230,7 +230,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         will only be set on POST requests.
 
           >>> bim.postOnly = True
-          >>> request = HTTPRequest(StringIO(''), {})
+          >>> request = HTTPRequest(StringIO(), {})
           >>> bim.getClientId(request)
           Traceback (most recent call last):
           ...
@@ -239,7 +239,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> print(request.response.getCookie(bim.namespace))
           None
 
-          >>> request = HTTPRequest(StringIO(''), {'REQUEST_METHOD': 'POST'})
+          >>> request = HTTPRequest(StringIO(), {'REQUEST_METHOD': 'POST'})
           >>> id = bim.getClientId(request)
           >>> id == bim.getClientId(request)
           True
@@ -255,7 +255,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         not set a cookie.
 
           >>> bim.thirdparty = True
-          >>> request = HTTPRequest(StringIO(''), {})
+          >>> request = HTTPRequest(StringIO(), {})
           >>> bim.getClientId(request)
           Traceback (most recent call last):
           ...
@@ -309,7 +309,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
           >>> from io import StringIO
           >>> from zope.publisher.http import HTTPRequest
-          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> request = HTTPRequest(StringIO(), {}, None)
           >>> bim = CookieClientIdManager()
 
         Because no cookie has been set, we get no id:
@@ -330,7 +330,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         When we set the request id, we also set a response cookie.  We
         can simulate getting this cookie back in a subsequent request:
 
-          >>> request2 = HTTPRequest(StringIO(''), {}, None)
+          >>> request2 = HTTPRequest(StringIO(), {}, None)
           >>> request2._cookies = dict(
           ...   [(name, cookie['value'])
           ...    for (name, cookie) in request.response._cookies.items()
@@ -354,7 +354,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
           >>> bim.namespace = 'uid'
           >>> bim.thirdparty = True
-          >>> request3 = HTTPRequest(StringIO(''), {}, None)
+          >>> request3 = HTTPRequest(StringIO(), {}, None)
           >>> request3._cookies = {'uid': 'AQAAf0Y4gjgAAAQ3AwMEAg=='}
           >>> bim.getRequestId(request3)
           'AQAAf0Y4gjgAAAQ3AwMEAg=='
@@ -400,7 +400,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
             >>> from io import StringIO
             >>> from zope.publisher.http import HTTPRequest
-            >>> request = HTTPRequest(StringIO(''), {}, None)
+            >>> request = HTTPRequest(StringIO(), {}, None)
             >>> bim = CookieClientIdManager()
             >>> bim.getRequestId(request)
             >>> bim.setRequestId(request, 'invalid id')
@@ -420,7 +420,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         Expiry time of 0 means never (well - close enough)
 
             >>> bim.cookieLifetime = 0
-            >>> request = HTTPRequest(StringIO(''), {}, None)
+            >>> request = HTTPRequest(StringIO(), {}, None)
             >>> bid = bim.getClientId(request)
             >>> cookie = request.response.getCookie(bim.namespace)
             >>> cookie['expires']
@@ -429,7 +429,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         A non-zero value means to expire after than number of seconds:
 
             >>> bim.cookieLifetime = 3600
-            >>> request = HTTPRequest(StringIO(''), {}, None)
+            >>> request = HTTPRequest(StringIO(), {}, None)
             >>> bid = bim.getClientId(request)
             >>> cookie = request.response.getCookie(bim.namespace)
             >>> import email.utils
@@ -443,7 +443,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         If another server in front of Zope (Apache, Nginx) is managing the
         cookies we won't set any ClientId cookies:
 
-          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> request = HTTPRequest(StringIO(), {}, None)
           >>> bim.thirdparty = True
           >>> from zope.testing.loggingsupport import InstalledHandler
           >>> handler = InstalledHandler(__name__)
@@ -459,7 +459,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
           >>> bim.thirdparty = False
           >>> bim.cookieLifetime = None
-          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> request = HTTPRequest(StringIO(), {}, None)
           >>> bim.secure = True
           >>> bim.setRequestId(request, '1234')
           >>> from pprint import pprint
@@ -487,7 +487,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         If the httpOnly attribute is set to a true value, then the
         HttpOnly cookie option is included.
 
-          >>> request = HTTPRequest(StringIO(''), {}, None)
+          >>> request = HTTPRequest(StringIO(), {}, None)
           >>> bim.secure = False
           >>> bim.httpOnly = True
           >>> bim.setRequestId(request, '1234')
@@ -559,7 +559,7 @@ def notifyVirtualHostChanged(event):
         >>> component.provideUtility(manager, IClientIdManager)
         >>> from zope.publisher.http import HTTPRequest
         >>> class DummyEvent (object):
-        ...     request = HTTPRequest(StringIO(''), {}, None)
+        ...     request = HTTPRequest(StringIO(), {}, None)
         >>> event = DummyEvent()
 
     With no cookies present, the manager should not be called:
