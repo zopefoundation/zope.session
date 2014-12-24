@@ -243,6 +243,11 @@ class PersistentSessionDataContainer(
                 [...]
             KeyError: 'pkg_id'
 
+        Cleanup:
+
+            >>> transaction.abort()
+            >>> c.close()
+
         """
         if self.timeout == 0:
             return UserDict.__getitem__(self, pkg_id)

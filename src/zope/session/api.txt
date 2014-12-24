@@ -94,9 +94,10 @@ Restrictions
 
 Data stored in the session must be persistent or picklable.
 
-    >>> session['oops'] = open(__file__)
     >>> import transaction
-    >>> transaction.commit()
+    >>> with open(__file__) as f:
+    ...     session['oops'] = f
+    ...     transaction.commit()
     Traceback (most recent call last):
         [...]
     TypeError: ...

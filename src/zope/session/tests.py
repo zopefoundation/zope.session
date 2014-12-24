@@ -79,14 +79,15 @@ def tearDown():
 # Test the code in our API documentation is correct
 def test_documentation():
     pass
-test_documentation.__doc__ = '''
+with open(os.path.join(os.path.dirname(__file__), 'api.txt')) as f:
+    test_documentation.__doc__ = '''
     >>> request = setUp(RAMSessionDataContainer)
 
     %s
 
     >>> tearDown()
 
-    ''' % (open(os.path.join(os.path.dirname(__file__), 'api.txt')).read(),)
+    ''' % f.read()
 
 
 def tearDownTransaction(test):
@@ -156,7 +157,14 @@ def testConflicts():
 
     Q.E.D.
 
-    >>> if tmpdir: shutil.rmtree(tmpdir)
+    Cleanup::
+
+    >>> conn_A.close()
+    >>> conn_B.close()
+    >>> db.close()
+    >>> if tmpdir:
+    ...     import shutil
+    ...     shutil.rmtree(tmpdir)
     """
 
 def testSessionIterationBug():
