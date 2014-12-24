@@ -450,9 +450,10 @@ class Session(object):
     def __getitem__(self, pkg_id):
         """See zope.session.interfaces.ISession
 
+            >>> from zope.publisher.http import HTTPRequest
             >>> from zope.session import tests
             >>> request = tests.setUp(PersistentSessionDataContainer)
-            >>> request2 = tests.HTTPRequest(StringIO(''), {}, None)
+            >>> request2 = HTTPRequest(StringIO(''), {}, None)
 
             >>> ISession.providedBy(Session(request))
             True

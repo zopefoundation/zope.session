@@ -33,13 +33,8 @@ from zope.schema.fieldproperty import FieldProperty
 from zope.session.interfaces import IClientIdManager
 from zope.session.session import digestEncode
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    # Py3: Now StringIO location.
-    from io import StringIO
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class MissingClientIdException(Exception):
     """No ClientId found in Request"""
@@ -187,6 +182,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         This creates one if necessary:
 
+          >>> from io import StringIO
           >>> from zope.publisher.http import HTTPRequest
           >>> request = HTTPRequest(StringIO(''), {})
           >>> bim = CookieClientIdManager()
@@ -311,6 +307,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         For example:
 
+          >>> from io import StringIO
           >>> from zope.publisher.http import HTTPRequest
           >>> request = HTTPRequest(StringIO(''), {}, None)
           >>> bim = CookieClientIdManager()
@@ -401,6 +398,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         Note that the id is checked for validity. Setting an
         invalid value is silently ignored:
 
+            >>> from io import StringIO
             >>> from zope.publisher.http import HTTPRequest
             >>> request = HTTPRequest(StringIO(''), {}, None)
             >>> bim = CookieClientIdManager()
@@ -447,7 +445,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
           >>> request = HTTPRequest(StringIO(''), {}, None)
           >>> bim.thirdparty = True
-          >>> bim.setRequestId(request, '1234')
+          >>> from zope.testing.loggingsupport import InstalledHandler
+          >>> handler = InstalledHandler(__name__)
+          >>> bim.setRequestId(request, '2345')
+          >>> handler.uninstall()
+          >>> len(handler.records)
+          1
           >>> cookie = request.response.getCookie(bim.namespace)
           >>> cookie
 
@@ -543,6 +546,7 @@ def notifyVirtualHostChanged(event):
     setRequestId if a cookie is present in the response for that manager. To
     demonstrate we create a dummy manager object and event:
 
+        >>> from io import StringIO
         >>> @implementer(ICookieClientIdManager)
         ... class DummyManager(object):
         ...     namespace = 'foo'

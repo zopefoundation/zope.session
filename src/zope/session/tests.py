@@ -13,74 +13,48 @@
 ##############################################################################
 """Session tests
 """
-import doctest
-import os
-import os.path
-import re
-import transaction
 import unittest
-import tempfile
-import shutil
+import os
 
-from zope.testing import cleanup
-import zope.component
 
-from zope.component import provideHandler, getGlobalSiteManager
-from zope.publisher.interfaces import IRequest
-from zope.publisher.http import HTTPRequest
-from zope.testing import renormalizing
-
-from zope.session.interfaces import IClientId, IClientIdManager, ISession
-from zope.session.interfaces import ISessionDataContainer
-from zope.session.interfaces import ISessionPkgData, ISessionData
-from zope.session.session import ClientId, Session
-from zope.session.session import PersistentSessionDataContainer
-from zope.session.session import RAMSessionDataContainer
-from zope.session.http import CookieClientIdManager
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    # Py3: Now StringIO location.
+def setUp(session_data_container_class=None):
     from io import StringIO
-
-
-checker = renormalizing.RENormalizing([
-    # Python 3 strings remove the "u".
-    (re.compile("u('.*?')"),
-     r"\1"),
-    (re.compile('u(".*?")'),
-     r"\1"),
-    # Python 3 bytes add a "b".
-    (re.compile("b('.*?')"),
-     r"\1"),
-    (re.compile('b(".*?")'),
-     r"\1"),
-    # Python 3 adds module name to exceptions.
-    (re.compile("zope.session.http.MissingClientIdException"),
-     r"MissingClientIdException"),
-    ])
-
-
-def setUp(session_data_container_class=PersistentSessionDataContainer):
+    from zope.testing import cleanup
+    from zope.component import provideAdapter
+    from zope.component import provideUtility
+    from zope.publisher.http import HTTPRequest
+    from zope.publisher.interfaces import IRequest
+    from zope.session.http import CookieClientIdManager
+    from zope.session.interfaces import IClientId
+    from zope.session.interfaces import IClientIdManager
+    from zope.session.interfaces import ISession
+    from zope.session.interfaces import ISessionDataContainer
+    from zope.session.session import ClientId
+    from zope.session.session import PersistentSessionDataContainer
+    from zope.session.session import Session
     cleanup.setUp()
-    zope.component.provideAdapter(ClientId, (IRequest,), IClientId)
-    zope.component.provideAdapter(Session, (IRequest,), ISession)
-    zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
+    if session_data_container_class is None:
+        session_data_container_class = PersistentSessionDataContainer
+    provideAdapter(ClientId, (IRequest,), IClientId)
+    provideAdapter(Session, (IRequest,), ISession)
+    provideUtility(CookieClientIdManager(), IClientIdManager)
     sdc = session_data_container_class()
     for product_id in ('', 'products.foo', 'products.bar', 'products.baz'):
-        zope.component.provideUtility(sdc, ISessionDataContainer, product_id)
+        provideUtility(sdc, ISessionDataContainer, product_id)
     request = HTTPRequest(StringIO(), {}, None)
     return request
 
 def tearDown():
+    from zope.testing import cleanup
     cleanup.tearDown()
 
 # Test the code in our API documentation is correct
 def test_documentation():
     pass
+
 with open(os.path.join(os.path.dirname(__file__), 'api.txt')) as f:
     test_documentation.__doc__ = '''
+    >>> from zope.session.session import RAMSessionDataContainer
     >>> request = setUp(RAMSessionDataContainer)
 
     %s
@@ -91,6 +65,7 @@ with open(os.path.join(os.path.dirname(__file__), 'api.txt')) as f:
 
 
 def tearDownTransaction(test):
+    import transaction
     transaction.abort()
 
 
@@ -112,9 +87,10 @@ def testConflicts():
     ...     tmpdir = None
     ... except ImportError:
     ...     # ZODB 3.9 (ConflictResolvingMappingStorage no longer exists)
+    ...     import tempfile
     ...     import ZODB.DB
     ...     tmpdir = tempfile.mkdtemp(prefix='zope.session-', suffix='-test')
-    ...     db = ZODB.DB(os.path.join(tmpdir, 'Data.fs'))
+    ...     db = ZODB.DB(os.path.join(tmpdir, 'testConflicts-Data.fs'))
     >>> from zope.session.session import (
     ...     PersistentSessionDataContainer, SessionData)
     >>> import transaction
@@ -196,6 +172,25 @@ def testSessionIterationBug():
 
 
 def test_suite():
+    import doctest
+    import re
+    from zope.testing import renormalizing
+
+    checker = renormalizing.RENormalizing([
+        # Python 3 strings remove the "u".
+        (re.compile("u('.*?')"),
+        r"\1"),
+        (re.compile('u(".*?")'),
+        r"\1"),
+        # Python 3 bytes add a "b".
+        (re.compile("b('.*?')"),
+        r"\1"),
+        (re.compile('b(".*?")'),
+        r"\1"),
+        # Python 3 adds module name to exceptions.
+        (re.compile("zope.session.http.MissingClientIdException"),
+        r"MissingClientIdException"),
+        ])
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(
             checker=checker,

@@ -27,12 +27,14 @@ responsible for propagating this id so that future requests from
 the client get the same id (eg. by setting an HTTP cookie). This
 utility is used when we adapt the request to the unique client id:
 
+    >>> from zope.session.interfaces import IClientId
     >>> client_id = IClientId(request)
 
 The `ISession` adapter gives us a mapping that can be used to store
 and retrieve session data. A unique key (the package id) is used
 to avoid namespace clashes:
 
+    >>> from zope.session.interfaces import ISession
     >>> pkg_id = 'products.foo'
     >>> session = ISession(request)[pkg_id]
     >>> session['color'] = 'red'
@@ -57,6 +59,7 @@ stored by adding a registration for desired `ISessionDataContainer`
 with the correct name.
 
     >>> import zope.component
+    >>> from zope.session.interfaces import ISessionDataContainer
     >>> sdc = zope.component.getUtility(ISessionDataContainer, pkg_id)
     >>> sdc[client_id][pkg_id] is session
     True
@@ -78,6 +81,8 @@ The `ISessionDataContainer` contains `ISessionData` objects, and
 should never need to know this unless you are writing administrative
 views for the session machinery.
 
+    >>> from zope.session.interfaces import ISessionData
+    >>> from zope.session.interfaces import ISessionPkgData
     >>> ISessionData.providedBy(sdc[client_id])
     True
     >>> ISessionPkgData.providedBy(sdc[client_id][pkg_id])
