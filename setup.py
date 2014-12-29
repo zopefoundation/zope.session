@@ -32,7 +32,7 @@ setup(name='zope.session',
     description='Client identification and sessions for Zope',
     long_description=(
         read('README.rst')
-        + '\n\n.. contents::\n\n' +
+        + '\n\n' +
         read('src', 'zope', 'session', 'design.txt')
         + '\n\n' +
         read('src', 'zope', 'session', 'api.txt')
