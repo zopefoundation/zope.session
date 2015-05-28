@@ -506,9 +506,27 @@ class Session(object):
             spd = sd[pkg_id] = SessionPkgData()
             return spd
 
+    # These methods, part of the sequence protocol, are implemented to
+    # raise exceptions. If they are not implemented and the `in`
+    # operator is used, then __getitem__ is called with integer keys
+    # until IndexError is raised...and since __getitem__ auto-creates
+    # any requested keys, that can never happen, leaving us in an
+    # infinite loop. The __contains__ method takes precedence over
+    # __iter__, but for consistency and BWC we must also not be iterable.
+    # They raise two different exceptions for BWC as well
 
     def __iter__(self):
+        # Section 5.9 of the language spec says:
+        # > for classes which do not define __contains__() but do define
+        # >__iter__() [the object is iterated]. If an exception is
+        # > raised during the iteration, it is as if in raised that exception.
+        # However, CPython turns NotImplementedError into a TypeError, but
+        # PyPy lets it propagate (like the spec says). Now that we implement
+        # __contains__, we emulate this behaviour both places.
         raise NotImplementedError
+
+    def __contains__(self, x):
+        raise TypeError
 
 
 @zope.interface.implementer(ISessionData)
