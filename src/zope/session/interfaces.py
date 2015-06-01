@@ -18,6 +18,8 @@ from zope.interface.common.mapping import IMapping, IReadMapping, IWriteMapping
 from zope import schema
 from zope.i18nmessageid import ZopeMessageFactory as _
 
+from ._compat import _u
+
 __docformat__ = 'restructuredtext'
 
 class IClientIdManager(Interface):
@@ -60,7 +62,7 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
 
     """
     timeout = schema.Int(
-            title=_(u"Timeout"),
+            title=_(_u("Timeout")),
             description=_(
                 "Number of seconds before data becomes stale and may "
                 "be removed. A value of '0' means no expiration."),

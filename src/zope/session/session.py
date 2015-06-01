@@ -55,7 +55,13 @@ try:
     from threading import get_ident
 except ImportError:
     # Py3: Python 2 has a different location.
-    from thread import get_ident
+    try:
+        from thread import get_ident
+    except ImportError:
+        # Python 3.2 has yet a different location
+        from threading import current_thread
+        def get_ident():
+            return current_thread().ident
 
 try:
     unicode
