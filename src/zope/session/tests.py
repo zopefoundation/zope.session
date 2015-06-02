@@ -145,10 +145,10 @@ def testConflicts():
 
 def testSessionIterationBug():
     """
-
     The zope.session.session.Session ISession implementation defines
-    an `__iter__` method that raises NotImplementedError in order to
-    avoid an infinite loop if iteration or a test for containment is
+    `__iter__` and `__contains__` methods that raise
+    NotImplementedError and TypeError, respectively, in order to avoid
+    an infinite loop if iteration or a test for containment is
     attempted on an instance.
 
     >>> import zope.session.session

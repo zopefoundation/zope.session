@@ -32,7 +32,7 @@ from zope.schema.fieldproperty import FieldProperty
 
 from zope.session.interfaces import IClientIdManager
 from zope.session.session import digestEncode
-
+from ._compat import _u
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +173,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if namespace is None:
             namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
         if secret is None:
-            secret = u'%.20f' % random.random()
+            secret = _u('%.20f') % random.random()
         self.namespace = namespace
         self.secret = secret
 
