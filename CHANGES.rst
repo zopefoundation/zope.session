@@ -1,22 +1,24 @@
-CHANGES
-=======
+=========
+ CHANGES
+=========
 
 4.2.0 (unreleased)
-------------------
+==================
 
-- Add support for Python 3.5.
+- Add support for Python 3.5 and 3.6.
 
-- Drop support for Python 2.6.
+- Drop support for Python 2.6 and 3.3
 
+- Reach 100% code coverage and maintain it via tox.ini and Travis CI.
 
 4.1.0 (2015-06-02)
-------------------
+==================
 
 - Add support for PyPy and PyPy3.
 
 
 4.0.0 (2014-12-24)
-------------------
+==================
 
 - Add support for Python 3.4.
 
@@ -24,13 +26,13 @@ CHANGES
 
 
 4.0.0a2 (2013-08-27)
---------------------
+====================
 
 - Fix test that fails on any timezone east of GMT
 
 
 4.0.0a1 (2013-02-21)
---------------------
+====================
 
 - Add support for Python 3.3
 
@@ -44,7 +46,7 @@ CHANGES
 
 
 3.9.5 (2011-08-11)
-------------------
+==================
 
 - LP #824355:  enable support for HttpOnly cookies.
 
@@ -54,7 +56,7 @@ CHANGES
 
 
 3.9.4 (2011-03-07)
-------------------
+==================
 
 - Add an explicit `provides` to the IClientId adapter declaration in
   adapter.zcml.
@@ -64,7 +66,7 @@ CHANGES
 
 
 3.9.3 (2010-09-25)
-------------------
+==================
 
 - Add test extra to declare test dependency on ``zope.testing``.
 
@@ -73,7 +75,7 @@ CHANGES
 
 
 3.9.2 (2009-11-23)
-------------------
+==================
 
 - Fix Python 2.4 hmac compatibility issue by only using hashlib in
   Python versions 2.5 and above.
@@ -91,13 +93,13 @@ CHANGES
 
 
 3.9.1 (2009-04-20)
-------------------
+==================
 
 - Restore compatibility with Python 2.4.
 
 
 3.9.0 (2009-03-19)
-------------------
+==================
 
 - Don't raise deprecation warnings on Python 2.6.
 
@@ -125,7 +127,7 @@ CHANGES
 
 
 3.8.1 (2009-02-23)
-------------------
+==================
 
 - Add an ability to set cookie effective domain for CookieClientIdManager.
   This is useful for simple cases when you have your application set up on
@@ -136,14 +138,14 @@ CHANGES
 
 
 3.8.0 (2008-12-31)
-------------------
+==================
 
 - Add missing test dependency on ``zope.site`` and
   ``zope.app.publication``.
 
 
 3.7.1 (2008-12-30)
-------------------
+==================
 
 - Specify i18n_domain for titles in apidoc.zcml
 
@@ -153,7 +155,7 @@ CHANGES
 
 
 3.7.0 (2008-10-03)
-------------------
+==================
 
 New features:
 
@@ -164,7 +166,7 @@ New features:
 
 
 3.6.0 (2008-08-12)
-------------------
+==================
 
 New features:
 
@@ -180,32 +182,32 @@ New features:
 
 
 3.5.2 (2008-06-12)
-------------------
+==================
 
 - Remove ConflictErrors caused on SessionData caused by setting
   ``lastAccessTime``.
 
 
 3.5.1 (2008-04-30)
-------------------
+==================
 
 - Split up the ZCML to make it possible to re-use more reasonably.
 
 
 3.5.0 (2008-03-11)
-------------------
+==================
 
 - Change the default session "resolution" to a sane value and document/test it.
 
 
 3.4.1 (2007-09-25)
-------------------
+==================
 
 - Fixed some meta data and switch to tgz release.
 
 
 3.4.0 (2007-09-25)
-------------------
+==================
 
 - Initial release
 

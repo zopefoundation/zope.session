@@ -13,16 +13,18 @@
 ##############################################################################
 """Session implementation
 """
+import base64
 import random
 import time
 from heapq import heapify, heappop
+
+import persistent
+from BTrees.OOBTree import OOBTree
 
 import ZODB
 import ZODB.MappingStorage
 import zope.location
 import zope.minmax
-import persistent
-from BTrees.OOBTree import OOBTree
 
 import zope.component
 import zope.interface
@@ -33,48 +35,24 @@ from zope.session.interfaces import \
         IClientIdManager, IClientId, ISession, ISessionDataContainer, \
         ISessionPkgData, ISessionData
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    # Py3: Now StringIO location.
-    from io import StringIO
 
 try:
     from UserDict import IterableUserDict as UserDict
 except ImportError:
-    # Py3: Now StringIO location.
+    # Py3: New UserDict location.
     from collections import UserDict
 
-try:
-    from base64 import encodebytes
-except ImportError:
-    # Py3: Python 2 only has encodestring
-    from base64 import encodestring as encodebytes
+_PY3 = bytes is not str
+encodebytes = base64.encodebytes if _PY3 else base64.encodestring
+get_ident = __import__('threading' if _PY3 else 'thread').get_ident
+text_type = str if _PY3 else unicode
 
 try:
-    from threading import get_ident
-except ImportError:
-    # Py3: Python 2 has a different location.
-    try:
-        from thread import get_ident
-    except ImportError:
-        # Python 3.2 has yet a different location
-        from threading import current_thread
-        def get_ident():
-            return current_thread().ident
-
-try:
-    unicode
-except NameError:
-    # Py3: Define unicode
-    unicode = str
-
-try:
-    transtable = bytes.maketrans(b'+/', b'-.')
-except AttributeError:
-    # Py3: Python 2 has a differnt location for maketrans.
     import string
     transtable = string.maketrans(b'+/', b'-.')
+except AttributeError:
+    # Python 3
+    transtable = bytes.maketrans(b'+/', b'-.')
 
 def digestEncode(s):
     """Encode SHA digest for cookie."""
@@ -83,7 +61,7 @@ def digestEncode(s):
 
 @zope.interface.implementer(IClientId)
 @zope.component.adapter(IRequest)
-class ClientId(unicode):
+class ClientId(text_type):
     """See zope.session.interfaces.IClientId
 
         >>> from zope.session import tests
@@ -99,14 +77,15 @@ class ClientId(unicode):
     """
 
     def __new__(cls, request):
-        return unicode.__new__(cls,
-            zope.component.getUtility(IClientIdManager).getClientId(request)
-            )
+        id_manager = zope.component.getUtility(IClientIdManager)
+        cid = id_manager.getClientId(request)
+        return text_type.__new__(cls, cid)
 
 
 @zope.interface.implementer(ISessionDataContainer)
-class PersistentSessionDataContainer(
-    zope.location.Location, persistent.Persistent, UserDict):
+class PersistentSessionDataContainer(zope.location.Location,
+                                     persistent.Persistent,
+                                     UserDict):
     """A SessionDataContainer that stores data in the ZODB"""
 
 
@@ -274,8 +253,8 @@ class PersistentSessionDataContainer(
             except AttributeError:
                 pass
 
-        if (self._v_last_sweep + self.resolution < now and
-            not self.disable_implicit_sweeps):
+        if (self._v_last_sweep + self.resolution < now
+            and not self.disable_implicit_sweeps):
             self.sweep()
             if getattr(self, '_v_old_sweep', None) is None:
                 self._v_old_sweep = self._v_last_sweep
@@ -339,7 +318,7 @@ class PersistentSessionDataContainer(
         # calculating the expiry time to ensure that we never remove
         # data that has been accessed within timeout seconds.
         expire_time = time.time() - self.timeout - self.resolution
-        heap = [(v.getLastAccessTime(), k) for k,v in self.data.items()]
+        heap = [(v.getLastAccessTime(), k) for k, v in self.data.items()]
         heapify(heap)
         while heap:
             lastAccessTime, key = heappop(heap)
@@ -423,11 +402,13 @@ class Session(object):
             'default'
 
            This method is lazy and does not create the session data.
+
             >>> session = Session(request).get('not.there')
             >>> session is None
             True
 
            The __getitem__ method instead creates the data.
+
             >>> session = Session(request)['not.there']
             >>> session is None
             False
@@ -447,10 +428,8 @@ class Session(object):
             sd = sdc[self.client_id]
         except KeyError:
             return default
-        try:
-            return sd[pkg_id]
-        except KeyError:
-            return default
+
+        return sd.get(pkg_id, default)
 
 
     def __getitem__(self, pkg_id):
@@ -458,8 +437,9 @@ class Session(object):
 
             >>> from zope.publisher.http import HTTPRequest
             >>> from zope.session import tests
+            >>> from io import StringIO
             >>> request = tests.setUp(PersistentSessionDataContainer)
-            >>> request2 = HTTPRequest(StringIO(''), {}, None)
+            >>> request2 = HTTPRequest(StringIO(u''), {}, None)
 
             >>> ISession.providedBy(Session(request))
             True
@@ -621,5 +601,10 @@ class SessionPkgData(persistent.Persistent, UserDict):
         >>> ISessionPkgData.providedBy(session)
         True
     """
+
+    # Note that this does not extend persistent.mapping.PersistentDict
+    # (which is also a UserDict subclass); we don't mark ourself
+    # modified when keys in our data are assigned/deleted
+
     def __init__(self):
         self.data = OOBTree()

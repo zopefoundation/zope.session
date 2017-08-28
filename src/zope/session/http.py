@@ -23,7 +23,8 @@ from email.utils import formatdate
 
 import zope.location
 from persistent import Persistent
-from zope import schema, component
+from zope import schema
+from zope import component
 from zope.interface import implementer
 from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.http import IHTTPApplicationRequest
@@ -32,7 +33,7 @@ from zope.schema.fieldproperty import FieldProperty
 
 from zope.session.interfaces import IClientIdManager
 from zope.session.session import digestEncode
-from ._compat import _u
+
 
 logger = logging.getLogger(__name__)
 
@@ -43,60 +44,60 @@ class ICookieClientIdManager(IClientIdManager):
     """Manages sessions using a cookie"""
 
     namespace = schema.ASCIILine(
-            title=_('Cookie Name'),
-            description=_(
-                "Name of cookie used to maintain state. "
-                "Must be unique to the site domain name, and only contain "
-                "ASCII letters, digits and '_'"
-                ),
-            required=True,
-            min_length=1,
-            max_length=30,
-            constraint=re.compile("^[\d\w_]+$").search,
-            )
+        title=_('Cookie Name'),
+        description=_(
+            "Name of cookie used to maintain state. "
+            "Must be unique to the site domain name, and only contain "
+            "ASCII letters, digits and '_'"
+        ),
+        required=True,
+        min_length=1,
+        max_length=30,
+        constraint=re.compile(r"^[\d\w_]+$").search,
+    )
 
     cookieLifetime = schema.Int(
-            title=_('Cookie Lifetime'),
-            description=_(
-                "Number of seconds until the browser expires the cookie. "
-                "Leave blank expire the cookie when the browser is quit. "
-                "Set to 0 to never expire. "
-                ),
-            min=0,
-            required=False,
-            default=None,
-            missing_value=None,
-            )
+        title=_('Cookie Lifetime'),
+        description=_(
+            "Number of seconds until the browser expires the cookie. "
+            "Leave blank expire the cookie when the browser is quit. "
+            "Set to 0 to never expire. "
+        ),
+        min=0,
+        required=False,
+        default=None,
+        missing_value=None,
+    )
 
     thirdparty = schema.Bool(
-            title=_('Third party cookie'),
-            description=_(
-                "Is a third party issuing the identification cookie? "
-                "Servers like Apache or Nginx have capabilities to issue "
-                "identification cookies too. If Third party cookies are "
-                "beeing used, Zope will never send a cookie back, just check "
-                "for them."
-                ),
-            required=False,
-            default=False,
-            )
+        title=_('Third party cookie'),
+        description=_(
+            "Is a third party issuing the identification cookie? "
+            "Servers like Apache or Nginx have capabilities to issue "
+            "identification cookies too. If Third party cookies are "
+            "beeing used, Zope will never send a cookie back, just check "
+            "for them."
+        ),
+        required=False,
+        default=False,
+    )
 
     domain = schema.TextLine(
-            title=_('Effective domain'),
-            description=_(
-                "An identification cookie can be restricted to a specific domain "
-                "using this option. This option sets the ``domain`` attribute "
-                "for the cookie header. It is useful for setting one "
-                "identification cookie for multiple subdomains. So if this "
-                "option is set to ``.example.org``, the cookie will be available "
-                "for subdomains like ``yourname.example.org``. "
-                "Note that if you set this option to some domain, the identification "
-                "cookie won't be available for other domains, so, for example "
-                "you won't be able to login using the SessionCredentials plugin "
-                "via another domain."
-                ),
-            required=False,
-            )
+        title=_('Effective domain'),
+        description=_(
+            "An identification cookie can be restricted to a specific domain "
+            "using this option. This option sets the ``domain`` attribute "
+            "for the cookie header. It is useful for setting one "
+            "identification cookie for multiple subdomains. So if this "
+            "option is set to ``.example.org``, the cookie will be available "
+            "for subdomains like ``yourname.example.org``. "
+            "Note that if you set this option to some domain, the identification "
+            "cookie won't be available for other domains, so, for example "
+            "you won't be able to login using the SessionCredentials plugin "
+            "via another domain."
+        ),
+        required=False,
+    )
 
     secure = schema.Bool(
         title=_('Request Secure communication'),
@@ -173,7 +174,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if namespace is None:
             namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
         if secret is None:
-            secret = _u('%.20f') % random.random()
+            secret = u'%.20f' % random.random()
         self.namespace = namespace
         self.secret = secret
 
@@ -268,13 +269,11 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         sid = self.getRequestId(request)
         if sid is None:
             if (self.thirdparty
-                or
-                (self.postOnly and not (request.method == 'POST'))
-                ):
+                or (self.postOnly and request.method != 'POST')):
                 raise MissingClientIdException
-            else:
-                sid = self.generateUniqueId()
-                self.setRequestId(request, sid)
+
+            sid = self.generateUniqueId()
+            self.setRequestId(request, sid)
         elif (not self.thirdparty) and self.cookieLifetime:
             # If we have a finite cookie lifetime, then set the cookie
             # on each request to avoid losing it.
@@ -341,12 +340,20 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.getRequestId(request) == bim.getRequestId(request2)
           True
 
-        Test a corner case where Python 2.6 hmac module does not allow
-        unicode as input:
+        We allow unicode values as input, even though we work in the
+        byte-based realm of HMAC:
 
           >>> id_uni = bim.generateUniqueId()
           >>> bim.setRequestId(request, id_uni)
           >>> bim.getRequestId(request) == id_uni
+          True
+
+        If the cookie data has been tampered with (doesn't correspond to our
+        secret), we will refuse to return an id:
+
+          >>> cookie = request.response.getCookie(bim.namespace)
+          >>> cookie['value'] = 'x' * len(cookie['value'])
+          >>> bim.getRequestId(request) is None
           True
 
         If another server is managing the ClientId cookies (Apache, Nginx)
@@ -366,27 +373,30 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         else:
             request = IHTTPApplicationRequest(request)
             sid = request.getCookies().get(self.namespace, None)
+
         if self.thirdparty:
             return sid
-        else:
 
-            # If there is an id set on the response, use that but
-            # don't trust it.  We need to check the response in case
-            # there has already been a new session created during the
-            # course of this request.
 
-            if sid is None or len(sid) != 54:
-                return None
-            s, mac = sid[:27], sid[27:]
+        # If there is an id set on the response, use that but
+        # don't trust it.  We need to check the response in case
+        # there has already been a new session created during the
+        # course of this request.
 
-            # call encode() on value s a workaround a bug where the hmac
-            # module only accepts str() types in Python 2.6
-            if (digestEncode(hmac.new(
-                    self.secret.encode(), s.encode(), digestmod=sha1
-                ).digest()).decode() != mac):
-                return None
-            else:
-                return sid
+        if sid is None or len(sid) != 54:
+            return None
+        s, mac = sid[:27], sid[27:]
+
+        # HMAC is specified to work on byte strings only so make
+        # sure to feed it that by encoding
+        mac_with_my_secret = hmac.new(self.secret.encode(), s.encode(),
+                                      digestmod=sha1).digest()
+        mac_with_my_secret = digestEncode(mac_with_my_secret).decode()
+
+        if mac_with_my_secret != mac:
+            return None
+
+        return sid
 
     def setRequestId(self, request, id):
         """Set cookie with id on request.
@@ -507,7 +517,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         if self.thirdparty:
             logger.warning('ClientIdManager is using thirdparty cookies, '
-                'ignoring setIdRequest call')
+                           'ignoring setIdRequest call')
             return
 
         response = request.response
@@ -592,6 +602,12 @@ def notifyVirtualHostChanged(event):
         >>> id is None
         True
 
+    Of course, if there is no request associated with the event,
+    nothing happens:
+
+        >>> event2.request = None
+        >>> notifyVirtualHostChanged(event2)
+
     Cleanup of the utility registration:
 
         >>> import zope.component.testing
@@ -604,7 +620,7 @@ def notifyVirtualHostChanged(event):
     request = IHTTPRequest(event.request, None)
     if event.request is None:
         return
-    for name, manager in component.getUtilitiesFor(IClientIdManager):
+    for _name, manager in component.getUtilitiesFor(IClientIdManager):
         if manager and ICookieClientIdManager.providedBy(manager):
             # Third party ClientId Managers need no modification at all
             if not manager.thirdparty:
