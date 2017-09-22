@@ -98,14 +98,19 @@ Restrictions
 ------------
 
 Data stored in the session must be persistent or picklable.
+(Exactly which builtin and standard objects can be pickled depends on
+the Python version, the Python implementation, and the ZODB version,
+so we demonstrate with a custom object.)
 
     >>> import transaction
-    >>> with open(__file__) as f:
-    ...     session['oops'] = f
-    ...     transaction.commit()
+    >>> class NoPickle(object):
+    ...     def __reduce__(self):
+    ...          raise TypeError("I cannot be pickled")
+    >>> session['oops'] = NoPickle()
+    >>> transaction.commit()
     Traceback (most recent call last):
         [...]
-    TypeError: ...
+    TypeError: I cannot be pickled
 
 Clean up:
 
