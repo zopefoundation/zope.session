@@ -18,7 +18,6 @@ from zope.interface.common.mapping import IMapping, IReadMapping, IWriteMapping
 from zope import schema
 from zope.i18nmessageid import ZopeMessageFactory as _
 
-from ._compat import _u
 
 __docformat__ = 'restructuredtext'
 
@@ -62,27 +61,27 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
 
     """
     timeout = schema.Int(
-            title=_(_u("Timeout")),
-            description=_(
-                "Number of seconds before data becomes stale and may "
-                "be removed. A value of '0' means no expiration."),
-            default=3600,
-            required=True,
-            min=0,
-            )
+        title=_(u"Timeout"),
+        description=_(
+            "Number of seconds before data becomes stale and may "
+            "be removed. A value of '0' means no expiration."),
+        default=3600,
+        required=True,
+        min=0,
+    )
     resolution = schema.Int(
-            title=_("Timeout resolution (in seconds)"),
-            description=_(
-                "Defines what the 'resolution' of item timeout is. "
-                "Setting this higher allows the transience machinery to "
-                "do fewer 'writes' at the expense of  causing items to time "
-                "out later than the 'Data object timeout value' by  a factor "
-                "of (at most) this many seconds."
-                ),
-            default=10*60,
-            required=True,
-            min=0,
-            )
+        title=_("Timeout resolution (in seconds)"),
+        description=_(
+            "Defines what the 'resolution' of item timeout is. "
+            "Setting this higher allows the transience machinery to "
+            "do fewer 'writes' at the expense of  causing items to time "
+            "out later than the 'Data object timeout value' by  a factor "
+            "of (at most) this many seconds."
+        ),
+        default=10*60,
+        required=True,
+        min=0,
+    )
 
     def __getitem__(self, product_id):
         """Return an ISessionPkgData"""
@@ -120,7 +119,7 @@ class ISession(Interface):
         """Return the relevant ISessionPkgData or default if not available."""
 
 
-class ISessionData(IReadMapping, IMapping):
+class ISessionData(IMapping):
     """Storage for a particular product id's session data
 
     Contains 0 or more ISessionPkgData instances
@@ -137,14 +136,14 @@ class ISessionData(IReadMapping, IMapping):
     # setter should be used instead of setting this property because of
     # conflict resolution: see https://bugs.launchpad.net/zope3/+bug/239531
     lastAccessTime = schema.Int(
-            title=_("Last Access Time"),
-            description=_(
-                "Approximate epoch time this ISessionData was last retrieved "
-                "from its ISessionDataContainer"
-                ),
-            default=0,
-            required=True,
-            )
+        title=_("Last Access Time"),
+        description=_(
+            "Approximate epoch time this ISessionData was last retrieved "
+            "from its ISessionDataContainer"
+        ),
+        default=0,
+        required=True,
+    )
 
     # Note that only IReadMapping and IWriteMaping are implemented.
     # We cannot give access to the keys, as they need to remain secret.
