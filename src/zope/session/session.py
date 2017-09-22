@@ -42,9 +42,14 @@ except ImportError:
     # Py3: New UserDict location.
     from collections import UserDict
 
+try:
+    from thread import get_ident
+except ImportError:
+    # Py3: New get_ident location
+    from threading import get_ident
+
 _PY3 = bytes is not str
 encodebytes = base64.encodebytes if _PY3 else base64.encodestring
-get_ident = __import__('threading' if _PY3 else 'thread').get_ident
 text_type = str if _PY3 else unicode
 
 try:
