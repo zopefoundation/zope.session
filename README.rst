@@ -10,7 +10,7 @@
         :target: https://pypi.org/project/zope.session/
         :alt: Supported Python versions
 
-.. image:: https://travis-ci.org/zopefoundation/zope.session.png?branch=master
+.. image:: https://travis-ci.org/zopefoundation/zope.session.svg?branch=master
         :target: https://travis-ci.org/zopefoundation/zope.session
 
 .. image:: https://coveralls.io/repos/github/zopefoundation/zope.session/badge.svg?branch=master
