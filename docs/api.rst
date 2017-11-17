@@ -39,14 +39,33 @@ requests, be it a cookie or some id mangled into the URL.
 
 .. testsetup::
 
-    from zope.session.tests import setUp
+    from zope.testing import cleanup
     from zope.session.session import RAMSessionDataContainer
-    setUp(RAMSessionDataContainer)
+    from io import StringIO
+    from zope.component import provideAdapter
+    from zope.component import provideUtility
+    from zope.publisher.http import HTTPRequest
+    from zope.publisher.interfaces import IRequest
+    from zope.session.http import CookieClientIdManager
+    from zope.session.interfaces import IClientId
+    from zope.session.interfaces import IClientIdManager
+    from zope.session.interfaces import ISession
+    from zope.session.interfaces import ISessionDataContainer
+    from zope.session.session import ClientId
+    from zope.session.session import PersistentSessionDataContainer
+    from zope.session.session import Session
+    cleanup.setUp()
+    provideAdapter(ClientId, (IRequest,), IClientId)
+    provideAdapter(Session, (IRequest,), ISession)
+    provideUtility(CookieClientIdManager(), IClientIdManager)
+    sdc = RAMSessionDataContainer()
+    for product_id in ('', 'products.foo', 'products.bar'):
+        provideUtility(sdc, ISessionDataContainer, product_id)
 
 .. testcleanup::
 
-    from zope.session.tests import tearDown
-    tearDown()
+    from zope.testing import cleanup
+    cleanup.tearDown()
 
 The `IClientIdManager` Utility provides this unique id. It is
 responsible for propagating this id so that future requests from the

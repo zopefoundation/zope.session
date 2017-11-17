@@ -70,15 +70,20 @@ class ClientId(text_type):
     """
     Default implementation of `zope.session.interfaces.IClientId`
 
-        >>> from zope.session import tests
-        >>> request = tests.setUp()
+        >>> from zope.publisher.http import HTTPRequest
+        >>> from io import BytesIO
+        >>> request = HTTPRequest(BytesIO(), {}, None)
+        >>> from zope.session.interfaces import IClientIdManager
+        >>> from zope.session.http import CookieClientIdManager
+        >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
 
         >>> id1 = ClientId(request)
         >>> id2 = ClientId(request)
         >>> id1 == id2
         True
 
-        >>> tests.tearDown()
+        >>> from zope.testing import cleanup
+        >>> cleanup.tearDown()
 
     """
 
@@ -401,10 +406,20 @@ class Session(object):
         """
         Get session data.
 
-            >>> from zope.session import tests
-            >>> request = tests.setUp(PersistentSessionDataContainer)
+            >>> from zope.publisher.interfaces import IRequest
+            >>> from zope.publisher.http import HTTPRequest
+            >>> from io import BytesIO
+            >>> from zope.session.interfaces import IClientIdManager, IClientId
+            >>> from zope.session.interfaces import ISessionDataContainer
+            >>> from zope.session.http import CookieClientIdManager
+            >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
+            >>> zope.component.provideAdapter(ClientId, (IRequest,), IClientId)
+            >>> sdc = PersistentSessionDataContainer()
+            >>> zope.component.provideUtility(sdc, ISessionDataContainer, '')
 
-        If we use get we get None or default returned if the pkg_id
+            >>> request = HTTPRequest(BytesIO(), {}, None)
+
+        If we use `get` we get `None` or *default* returned if the *pkg_id*
         is not there.
 
             >>> session = Session(request).get('not.there', 'default')
@@ -425,7 +440,8 @@ class Session(object):
             >>> session = Session(request).get('not.there')
             >>> session is None
             False
-            >>> tests.tearDown()
+            >>> import zope.testing.cleanup
+            >>> zope.testing.cleanup.tearDown()
         """
 
 
@@ -445,11 +461,20 @@ class Session(object):
         """
         Get or create session data.
 
+            >>> from zope.publisher.interfaces import IRequest
             >>> from zope.publisher.http import HTTPRequest
-            >>> from zope.session import tests
-            >>> from io import StringIO
-            >>> request = tests.setUp(PersistentSessionDataContainer)
-            >>> request2 = HTTPRequest(StringIO(u''), {}, None)
+            >>> from io import BytesIO
+            >>> from zope.session.interfaces import IClientIdManager, IClientId
+            >>> from zope.session.http import CookieClientIdManager
+            >>> from zope.session.interfaces import ISessionDataContainer
+            >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
+            >>> zope.component.provideAdapter(ClientId, (IRequest,), IClientId)
+            >>> sdc = PersistentSessionDataContainer()
+            >>> for product_id in ('', 'products.foo', 'products.bar'):
+            ...     zope.component.provideUtility(sdc, ISessionDataContainer, product_id)
+
+            >>> request = HTTPRequest(BytesIO(), {}, None)
+            >>> request2 = HTTPRequest(BytesIO(), {}, None)
 
             >>> ISession.providedBy(Session(request))
             True
@@ -483,7 +508,8 @@ class Session(object):
             >>> session3['color']
             'vomit'
 
-            >>> tests.tearDown()
+            >>> from zope.testing import cleanup
+            >>> cleanup.tearDown()
 
         """
         sdc = self._sdc(pkg_id)
