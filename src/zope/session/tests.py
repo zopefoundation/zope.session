@@ -165,12 +165,6 @@ def test_suite():
         'zope.session.http',
         checker=checker,
         optionflags=flags))
-    suite.addTest(doctest.DocFileSuite(
-        'api.rst', 'design.rst',
-        checker=checker,
-        setUp=docSetUp,
-        tearDown=tearDown,
-        optionflags=flags))
     return suite
 
 

@@ -67,7 +67,8 @@ def digestEncode(s):
 @zope.interface.implementer(IClientId)
 @zope.component.adapter(IRequest)
 class ClientId(text_type):
-    """See zope.session.interfaces.IClientId
+    """
+    Default implementation of `zope.session.interfaces.IClientId`
 
         >>> from zope.session import tests
         >>> request = tests.setUp()
@@ -91,7 +92,9 @@ class ClientId(text_type):
 class PersistentSessionDataContainer(zope.location.Location,
                                      persistent.Persistent,
                                      UserDict):
-    """A SessionDataContainer that stores data in the ZODB"""
+    """
+    A `zope.session.interfaces.ISessionDataContainer` that stores data in the ZODB.
+    """
 
 
     _v_last_sweep = 0 # Epoch time sweep last run
@@ -104,7 +107,7 @@ class PersistentSessionDataContainer(zope.location.Location,
         self.resolution = 10 * 60
 
     def __getitem__(self, pkg_id):
-        """Retrieve an ISessionData
+        """Retrieve an `zope.session.interfaces.ISessionData`
 
             >>> sdc = PersistentSessionDataContainer()
 
@@ -154,20 +157,20 @@ class PersistentSessionDataContainer(zope.location.Location,
 
             >>> sdc.disable_implicit_sweeps = False
 
-        Ensure the lastAccessTime on the ISessionData is being updated
-        occasionally. The ISessionDataContainer maintains this whenever
-        the ISessionData is set or retrieved.
+        Ensure the ``lastAccessTime`` on the `.ISessionData` is being updated
+        occasionally. The `.ISessionDataContainer` maintains this whenever
+        the `.ISessionData` is set or retrieved.
 
-        lastAccessTime on the ISessionData is set when it is added
-        to the ISessionDataContainer
+        ``lastAccessTime`` on the ``ISessionData`` is set when it is added
+        to the ``ISessionDataContainer``
 
             >>> sdc['client_id'] = sd = SessionData()
             >>> sd.getLastAccessTime() > 0
             True
 
-        The lastAccessTime is also updated whenever the ISessionData
-        is retrieved through the ISessionDataContainer, at most
-        once every 'resolution' seconds.
+        The ``lastAccessTime`` is also updated whenever the ``ISessionData``
+        is retrieved through the ``ISessionDataContainer``, at most
+        once every ``resolution`` seconds.
 
             >>> then = sd.getLastAccessTime() - 4
             >>> sd.setLastAccessTime(then)
@@ -178,9 +181,9 @@ class PersistentSessionDataContainer(zope.location.Location,
             >>> now == sdc['client_id'].getLastAccessTime()
             True
 
-        Ensure the lastAccessTime is not modified and no garbage collection
+        Ensure the ``lastAccessTime`` is not modified and no garbage collection
         occurs when timeout == 0. We test this by faking a stale
-        ISessionData object.
+        ``ISessionData`` object.
 
             >>> sdc.timeout = 0
             >>> sd.setLastAccessTime(sd.getLastAccessTime() - 5000)
@@ -259,7 +262,7 @@ class PersistentSessionDataContainer(zope.location.Location,
                 pass
 
         if (self._v_last_sweep + self.resolution < now
-            and not self.disable_implicit_sweeps):
+                and not self.disable_implicit_sweeps):
             self.sweep()
             if getattr(self, '_v_old_sweep', None) is None:
                 self._v_old_sweep = self._v_last_sweep
@@ -273,12 +276,12 @@ class PersistentSessionDataContainer(zope.location.Location,
         return rv
 
     def __setitem__(self, pkg_id, session_data):
-        """Set an ISessionPkgData
+        """Set an `zope.session.interfaces.ISessionData`
 
             >>> sdc = PersistentSessionDataContainer()
             >>> sad = SessionData()
 
-        __setitem__ sets the ISessionData's lastAccessTime
+        ``__setitem__`` sets the ``ISessionData``'s ``lastAccessTime``
 
             >>> sad.getLastAccessTime()
             0
@@ -302,7 +305,7 @@ class PersistentSessionDataContainer(zope.location.Location,
             >>> sdc['1'] = SessionData()
             >>> sdc['2'] = SessionData()
 
-        Wind back the clock on one of the ISessionData's
+        Wind back the clock on one of the `zope.session.interfaces.ISessionData`'s
         so it gets garbage collected
 
             >>> sdc['2'].setLastAccessTime(
@@ -334,7 +337,8 @@ class PersistentSessionDataContainer(zope.location.Location,
 
 
 class RAMSessionDataContainer(PersistentSessionDataContainer):
-    """A SessionDataContainer that stores data in RAM.
+    """
+    A `zope.session.interfaces.ISessionDataContainer` that stores data in RAM.
 
     Currently session data is not shared between Zope clients, so
     server affinity will need to be maintained to use this in a ZEO cluster.
@@ -345,7 +349,6 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
         True
         >>> ISessionData.providedBy(sdc['1'])
         True
-
     """
     def __init__(self):
         self.resolution = 5*60
@@ -379,7 +382,9 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
 @zope.interface.implementer(ISession)
 @zope.component.adapter(IRequest)
 class Session(object):
-    """See zope.session.interfaces.ISession"""
+    """
+    Default implementation of  `zope.session.interfaces.ISession`
+    """
 
     def __init__(self, request):
         self.client_id = str(IClientId(request))
@@ -393,26 +398,26 @@ class Session(object):
             return zope.component.getUtility(ISessionDataContainer)
 
     def get(self, pkg_id, default=None):
-
-        """See zope.session.interfaces.ISession
+        """
+        Get session data.
 
             >>> from zope.session import tests
             >>> request = tests.setUp(PersistentSessionDataContainer)
 
-           If we use get we get None or default returned if the pkg_id
-           is not there.
+        If we use get we get None or default returned if the pkg_id
+        is not there.
 
             >>> session = Session(request).get('not.there', 'default')
             >>> session
             'default'
 
-           This method is lazy and does not create the session data.
+        This method is lazy and does not create the session data.
 
             >>> session = Session(request).get('not.there')
             >>> session is None
             True
 
-           The __getitem__ method instead creates the data.
+        The ``__getitem__`` method instead creates the data.
 
             >>> session = Session(request)['not.there']
             >>> session is None
@@ -421,7 +426,6 @@ class Session(object):
             >>> session is None
             False
             >>> tests.tearDown()
-
         """
 
 
@@ -438,7 +442,8 @@ class Session(object):
 
 
     def __getitem__(self, pkg_id):
-        """See zope.session.interfaces.ISession
+        """
+        Get or create session data.
 
             >>> from zope.publisher.http import HTTPRequest
             >>> from zope.session import tests
@@ -522,7 +527,8 @@ class Session(object):
 
 @zope.interface.implementer(ISessionData)
 class SessionData(persistent.Persistent, UserDict):
-    """See zope.session.interfaces.ISessionData
+    """
+    Default implementation of `zope.session.interfaces.ISessionData`
 
         >>> session = SessionData()
         >>> ISessionData.providedBy(session)
@@ -530,42 +536,41 @@ class SessionData(persistent.Persistent, UserDict):
         >>> session.getLastAccessTime()
         0
 
-    Before the zope.minmax package this class used to have an attribute
-    lastAccessTime initialized in the class itself to zero.
+    Before the `zope.minmax.Maximum` object this class used to have an attribute
+    ``lastAccessTime`` initialized in the class itself to zero.
     To avoid changing the interface, that attribute has been turned into a
     property.  This part tests the behavior of a legacy session which would
     have the lastAccessTime attribute loaded from the database.
     The implementation should work for that case as well as with the new
-    session where lastAccessTime is a property.  These tests will
+    session where ``lastAccessTime`` is a property. These tests will
     be removed in a later release (see the comments in the code below).
 
-    First, create an instance of SessionData and remove a protected attribute
-    _lastAccessTime from it to make it more like the legacy SessionData.  The
-    subsequent attempt to get lastAccessTime will return a 0, because the
-    lastAccessTime is not there and the dictionary returns the default value
-    zero supplied to its get() method.
+    First, create an instance of `SessionData` and remove a protected attribute
+    ``_lastAccessTime`` from it to make it more like the legacy `SessionData`.  The
+    subsequent attempt to get ``lastAccessTime`` will return a 0, because the
+    ``lastAccessTime`` is not there and the dictionary returns the default value
+    zero supplied to its `get` method.
 
         >>> legacy_session = SessionData()
         >>> del legacy_session._lastAccessTime
         >>> legacy_session.getLastAccessTime()
         0
 
-    Now, artificially add lastAccessTime to the instance's dictionary.
-    This should make it exactly like the legacy SessionData().
+    Now, artificially add ``lastAccessTime`` to the instance's dictionary.
+    This should make it exactly like the legacy `SessionData`.
 
         >>> legacy_session.__dict__['lastAccessTime'] = 42
         >>> legacy_session.getLastAccessTime()
         42
 
-    Finally, assign to lastAccessTime.  Since the instance now looks like a
+    Finally, assign to ``lastAccessTime``. Since the instance now looks like a
     legacy instance, this will trigger, through the property mechanism, a
-    creation of a zope.minmax.Maximum() object which will take over the
+    creation of a `zope.minmax.Maximum` object which will take over the
     handling of this value and its conflict resolution from now on.
 
         >>> legacy_session.setLastAccessTime(13)
         >>> legacy_session._lastAccessTime.value
         13
-
     """
 
     # this is for support of legacy sessions; this comment and
@@ -600,7 +605,8 @@ class SessionData(persistent.Persistent, UserDict):
 
 @zope.interface.implementer(ISessionPkgData)
 class SessionPkgData(persistent.Persistent, UserDict):
-    """See zope.session.interfaces.ISessionPkgData
+    """
+    Default implementation of `zope.session.interfaces.ISessionPkgData`
 
         >>> session = SessionPkgData()
         >>> ISessionPkgData.providedBy(session)

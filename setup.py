@@ -38,10 +38,6 @@ setup(name='zope.session',
       long_description=(
           read('README.rst')
           + '\n\n' +
-          read('src', 'zope', 'session', 'design.rst')
-          + '\n\n' +
-          read('src', 'zope', 'session', 'api.rst')
-          + '\n\n' +
           read('CHANGES.rst')
       ),
       license='ZPL 2.1',
@@ -65,7 +61,7 @@ setup(name='zope.session',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: Zope3',
       ],
-      url='http://github.com/zopefoundation/zope.session',
+      url='https://github.com/zopefoundation/zope.session',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       namespace_packages=['zope',],
@@ -81,6 +77,10 @@ setup(name='zope.session',
       ],
       extras_require={
           'test': TESTS_REQUIRE,
+          'docs': [
+              'Sphinx',
+              'repoze.sphinx.autointerface',
+          ],
       },
       tests_require=TESTS_REQUIRE,
       test_suite='zope.session.tests.test_suite',
