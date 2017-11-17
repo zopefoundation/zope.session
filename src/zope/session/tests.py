@@ -41,6 +41,7 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         tmpdir = tempfile.mkdtemp(prefix='zope.session-', suffix='-test')
         self.addCleanup(shutil.rmtree, tmpdir)
         db = ZODB.DB(os.path.join(tmpdir, 'testConflicts-Data.fs'))
+        self.addCleanup(db.close)
         from zope.session.session import PersistentSessionDataContainer, SessionData
         import transaction
         tm_A = transaction.TransactionManager()
