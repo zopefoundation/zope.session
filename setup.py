@@ -26,6 +26,8 @@ def read(*rnames):
         return f.read()
 
 TESTS_REQUIRE = [
+    'zope.configuration',
+    'zope.traversing',
     'zope.testing',
     'zope.testrunner',
 ]

@@ -20,52 +20,44 @@ Overview
     as page counters) should consider using cookies or specialized
     session implementations.
 
-.. note::
-    This package provides a ``configure.zcml`` for use with
-    `zope.configuration.xmlconfig` that provides the default adapters
-    for `IClientId` (`.ClientId`), `ISession` (`.Session`) and the
-    `zope.traversing.interfaces.IPathAdapter` named ``session``.
+Setup
+-----
 
-    It also provides ``zope.security`` declarations and marks
-    `.CookieClientIdManager` and `.PersistentSessionDataContainer` as
-    implementing `zope.annotation.interfaces.IAttributeAnnotatable` if
-    that package is installed.
+This package provides a ``configure.zcml`` for use with
+`zope.configuration.xmlconfig` that provides the default adapters for
+`IClientId` (`.ClientId`), `ISession` (`.Session`) and the
+`zope.traversing.interfaces.IPathAdapter` named ``session``.
 
-    This document assumes that configuration has been completed.
+It also provides ``zope.security`` declarations and marks
+`.CookieClientIdManager` and `.PersistentSessionDataContainer` as
+implementing `zope.annotation.interfaces.IAttributeAnnotatable` if
+that package is installed.
+
+This document assumes that configuration has been completed:
+
+    >>> from zope.configuration import xmlconfig
+    >>> import zope.session
+    >>> _ = xmlconfig.file('configure.zcml', zope.session)
+
+Note that it does **not** install any `ISessionDataContainer`
+or `IClientIdManager` utilities. We do that manually:
+
+    >>> from zope.component import provideUtility
+    >>> from zope.session.interfaces import IClientIdManager
+    >>> from zope.session.interfaces import ISessionDataContainer
+    >>> from zope.session.http import CookieClientIdManager
+    >>> from zope.session.session import RAMSessionDataContainer
+    >>> provideUtility(CookieClientIdManager(), IClientIdManager)
+    >>> sdc = RAMSessionDataContainer()
+    >>> for product_id in ('', 'products.foo', 'products.bar'):
+    ...    provideUtility(sdc, ISessionDataContainer, product_id)
+
+Sessions
+--------
 
 Sessions allow us to fake state over a stateless protocol - HTTP. We
 do this by having a unique identifier stored across multiple HTTP
 requests, be it a cookie or some id mangled into the URL.
-
-.. testsetup::
-
-    from zope.testing import cleanup
-    from zope.session.session import RAMSessionDataContainer
-    from io import StringIO
-    from zope.component import provideAdapter
-    from zope.component import provideUtility
-    from zope.publisher.http import HTTPRequest
-    from zope.publisher.interfaces import IRequest
-    from zope.session.http import CookieClientIdManager
-    from zope.session.interfaces import IClientId
-    from zope.session.interfaces import IClientIdManager
-    from zope.session.interfaces import ISession
-    from zope.session.interfaces import ISessionDataContainer
-    from zope.session.session import ClientId
-    from zope.session.session import PersistentSessionDataContainer
-    from zope.session.session import Session
-    cleanup.setUp()
-    provideAdapter(ClientId, (IRequest,), IClientId)
-    provideAdapter(Session, (IRequest,), ISession)
-    provideUtility(CookieClientIdManager(), IClientIdManager)
-    sdc = RAMSessionDataContainer()
-    for product_id in ('', 'products.foo', 'products.bar'):
-        provideUtility(sdc, ISessionDataContainer, product_id)
-
-.. testcleanup::
-
-    from zope.testing import cleanup
-    cleanup.tearDown()
 
 The `IClientIdManager` Utility provides this unique id. It is
 responsible for propagating this id so that future requests from the
@@ -116,9 +108,7 @@ with the correct name.
 
 If no `ISessionDataContainer` utility can be located by name using the
 package id, then the unnamed `ISessionDataContainer` utility is used
-as a fallback. An unnamed `ISessionDataContainer` is automatically
-created for you, which may replaced with a different implementation if
-desired.
+as a fallback.
 
     >>> ISession(request)['unknown'] \
     ...     is zope.component.getUtility(ISessionDataContainer)[client_id]\
@@ -161,10 +151,6 @@ demonstrate with a custom object.)
     Traceback (most recent call last):
         [...]
     TypeError: I cannot be pickled
-
-.. testcleanup::
-
-    transaction.abort()
 
 
 Page Templates
@@ -219,3 +205,10 @@ minutes.
 
     >>> data_container.resolution
     600
+
+
+.. testcleanup::
+
+    transaction.abort()
+    from zope.testing import cleanup
+    cleanup.tearDown()

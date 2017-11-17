@@ -3,6 +3,9 @@
   xmlns:zcml="http://namespaces.zope.org/zcml"
   >
 
+  <include package="zope.security" file="meta.zcml" />
+  <include package="zope.security" file="permissions.zcml" />
+
   <class class=".session.Session">
     <allow interface=".interfaces.ISession" />
     <implements interface="zope.traversing.interfaces.IPathAdapter" />
