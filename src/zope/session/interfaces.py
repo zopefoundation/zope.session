@@ -29,7 +29,8 @@ class IClientIdManager(Interface):
     """
 
     def getClientId(request):
-        """Return the client id for the given request as a string.
+        """
+        Return the client id for the given request as a string.
 
         If the request doesn't have an attached sessionId a new one will be
         generated.
@@ -38,19 +39,19 @@ class IClientIdManager(Interface):
         session id will be preserved. Depending on the specific method,
         further action might be necessary on the part of the user.  See the
         documentation for the specific implementation and its interfaces.
-
         """
 
 
 class IClientId(Interface):
-    """A unique id representing a session"""
+    """A unique id representing a session."""
 
     def __str__():
         """As a unique ASCII string"""
 
 
 class ISessionDataContainer(IReadMapping, IWriteMapping):
-    """Stores data objects for sessions.
+    """
+    Stores data objects for sessions.
 
     The object implementing this interface is responsible for expiring data as
     it feels appropriate.
@@ -60,9 +61,8 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
       session_data_container[client_id][product_id][key] = value
 
     Note that this interface does not support the full mapping interface -
-    the keys need to remain secret so we can't give access to keys(),
-    values() etc.
-
+    the keys need to remain secret so we can't give access to :meth:`keys`,
+    :meth:`values` etc.
     """
     timeout = schema.Int(
         title=_(u"Timeout"),
@@ -108,7 +108,7 @@ class ISession(Interface):
 
     def __getitem__(product_id):
         """
-        Return the relevant `ISessionData`
+        Return the relevant `ISessionData`.
 
         This involves locating the correct `ISessionDataContainer` for the
         given product id, determining the client id, and returning the
@@ -128,14 +128,15 @@ class ISession(Interface):
 
 class ISessionData(IMapping):
     """
-    Storage for a particular product id's session data
+    Storage for a particular product id's session data.
 
-    Contains 0 or more `ISessionPkgData` instances
+    Contains 0 or more `ISessionPkgData` instances.
     """
 
     def getLastAccessTime():
         """
-        Return approximate epoch time this `ISessionData` was last retrieved.
+        Return approximate epoch time this `ISessionData` was last
+        retrieved.
         """
 
     def setLastAccessTime():

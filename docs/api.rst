@@ -200,7 +200,7 @@ also means that if the last-access-time + the-resolution < now, then
 the session is considered to have timed out.
 
 The default resolution is 10 minutes (600 seconds), meaning that a
-users session will actually time out sometime between 50 and 60
+user's session will actually time out sometime between 50 and 60
 minutes.
 
     >>> data_container.resolution

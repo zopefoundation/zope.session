@@ -68,19 +68,27 @@ def digestEncode(s):
 @zope.component.adapter(IRequest)
 class ClientId(text_type):
     """
-    Default implementation of `zope.session.interfaces.IClientId`
+    Default implementation of `zope.session.interfaces.IClientId`.
+
+    .. doctest::
+        :hide:
 
         >>> from zope.publisher.http import HTTPRequest
         >>> from io import BytesIO
-        >>> request = HTTPRequest(BytesIO(), {}, None)
         >>> from zope.session.interfaces import IClientIdManager
         >>> from zope.session.http import CookieClientIdManager
         >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
 
+    `ClientId` objects for the same request should be equal:
+
+        >>> request = HTTPRequest(BytesIO(), {}, None)
         >>> id1 = ClientId(request)
         >>> id2 = ClientId(request)
         >>> id1 == id2
         True
+
+    .. doctest::
+        :hide:
 
         >>> from zope.testing import cleanup
         >>> cleanup.tearDown()
@@ -406,6 +414,9 @@ class Session(object):
         """
         Get session data.
 
+        .. doctest::
+            :hide:
+
             >>> from zope.publisher.interfaces import IRequest
             >>> from zope.publisher.http import HTTPRequest
             >>> from io import BytesIO
@@ -417,22 +428,22 @@ class Session(object):
             >>> sdc = PersistentSessionDataContainer()
             >>> zope.component.provideUtility(sdc, ISessionDataContainer, '')
 
-            >>> request = HTTPRequest(BytesIO(), {}, None)
 
         If we use `get` we get `None` or *default* returned if the *pkg_id*
-        is not there.
+        is not there:
 
+            >>> request = HTTPRequest(BytesIO(), {}, None)
             >>> session = Session(request).get('not.there', 'default')
             >>> session
             'default'
 
-        This method is lazy and does not create the session data.
+        This method is lazy and does not create the session data:
 
             >>> session = Session(request).get('not.there')
             >>> session is None
             True
 
-        The ``__getitem__`` method instead creates the data.
+        The ``__getitem__`` method instead creates the data:
 
             >>> session = Session(request)['not.there']
             >>> session is None
@@ -440,6 +451,10 @@ class Session(object):
             >>> session = Session(request).get('not.there')
             >>> session is None
             False
+
+        .. doctest::
+            :hide:
+
             >>> import zope.testing.cleanup
             >>> zope.testing.cleanup.tearDown()
         """
@@ -461,6 +476,9 @@ class Session(object):
         """
         Get or create session data.
 
+        .. doctest::
+            :hide:
+
             >>> from zope.publisher.interfaces import IRequest
             >>> from zope.publisher.http import HTTPRequest
             >>> from io import BytesIO
@@ -473,30 +491,28 @@ class Session(object):
             >>> for product_id in ('', 'products.foo', 'products.bar'):
             ...     zope.component.provideUtility(sdc, ISessionDataContainer, product_id)
 
+        Setup some sessions, each with a distinct namespace:
+
             >>> request = HTTPRequest(BytesIO(), {}, None)
             >>> request2 = HTTPRequest(BytesIO(), {}, None)
-
             >>> ISession.providedBy(Session(request))
             True
-
-        Setup some sessions, each with a distinct namespace
-
             >>> session1 = Session(request)['products.foo']
             >>> session2 = Session(request)['products.bar']
             >>> session3 = Session(request2)['products.bar']
 
         If we use the same parameters, we should retrieve the
-        same object
+        same object:
 
             >>> session1 is Session(request)['products.foo']
             True
 
-        Make sure it returned sane values
+        Make sure it returned sane values:
 
             >>> ISessionPkgData.providedBy(session1)
             True
 
-        Make sure that pkg_ids don't share a namespace.
+        Make sure that pkg_ids don't share a namespace:
 
             >>> session1['color'] = 'red'
             >>> session2['color'] = 'blue'
@@ -507,6 +523,9 @@ class Session(object):
             'blue'
             >>> session3['color']
             'vomit'
+
+        .. doctest::
+            :hide:
 
             >>> from zope.testing import cleanup
             >>> cleanup.tearDown()

@@ -271,13 +271,13 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'https://docs.python.org/': None,
+    'https://persistent.readthedocs.io/en/latest/': None,
+    'https://zopeannotation.readthedocs.io/en/latest/': None,
+    'https://zopeconfiguration.readthedocs.io/en/latest/': None,
     'https://zopeinterface.readthedocs.io/en/latest/': None,
     'https://zopelocation.readthedocs.io/en/latest/': None,
-    'https://persistent.readthedocs.io/en/latest/': None,
     'https://zopeminmax.readthedocs.io/en/latest/': None,
-    'https://zopeconfiguration.readthedocs.io/en/latest/': None,
     'https://zopetraversing.readthedocs.io/en/latest/': None,
-    'https://zopeannotation.readthedocs.io/en/latest/': None,
 }
 
 autodoc_default_flags = ['members', 'show-inheritance']

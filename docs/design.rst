@@ -99,7 +99,7 @@ terms of total session time, or maximum inactive time, or some
 combination.
 
 There are a number of ways to approach this. You can expire client
-IDs. You can expire session data.
+identifiers. You can expire session data.
 
 Data Expiration
 ===============

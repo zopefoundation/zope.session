@@ -556,7 +556,10 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         response.setHeader('Expires', 'Mon, 26 Jul 1997 05:00:00 GMT')
 
 def notifyVirtualHostChanged(event):
-    """Adjust cookie paths when `IVirtualHostRequest` information changes.
+    """
+    Adjust cookie paths when
+    `zope.publisher.interfaces.http.IVirtualHostRequest` information
+    changes.
 
     Given an event, this method should call a `CookieClientIdManager`'s
     setRequestId if a cookie is present in the response for that manager. To
@@ -593,7 +596,7 @@ def notifyVirtualHostChanged(event):
         'bar'
 
     If a server in front of Zope manages the ClientIds (Apache, Nginx), we
-    don't need to take care about the cookies
+    don't need to take care about the cookies:
 
         >>> manager2 = DummyManager()
         >>> manager2.thirdparty = True
@@ -614,11 +617,11 @@ def notifyVirtualHostChanged(event):
         >>> event2.request = None
         >>> notifyVirtualHostChanged(event2)
 
-    Cleanup of the utility registration:
+    .. doctest::
+        :hide:
 
         >>> import zope.component.testing
         >>> zope.component.testing.tearDown()
-
     """
     # the event sends us a IHTTPApplicationRequest, but we need a
     # IHTTPRequest for the response attribute, and so does the cookie-
