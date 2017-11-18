@@ -16,50 +16,13 @@
 import unittest
 from zope.testing import cleanup
 
-def setUp(session_data_container_class=None):
-    from io import StringIO
-    from zope.component import provideAdapter
-    from zope.component import provideUtility
-    from zope.publisher.http import HTTPRequest
-    from zope.publisher.interfaces import IRequest
-    from zope.session.http import CookieClientIdManager
-    from zope.session.interfaces import IClientId
-    from zope.session.interfaces import IClientIdManager
-    from zope.session.interfaces import ISession
-    from zope.session.interfaces import ISessionDataContainer
-    from zope.session.session import ClientId
-    from zope.session.session import PersistentSessionDataContainer
-    from zope.session.session import Session
-    cleanup.setUp()
-    if session_data_container_class is None:
-        session_data_container_class = PersistentSessionDataContainer
-    provideAdapter(ClientId, (IRequest,), IClientId)
-    provideAdapter(Session, (IRequest,), ISession)
-    provideUtility(CookieClientIdManager(), IClientIdManager)
-    sdc = session_data_container_class()
-    for product_id in ('', 'products.foo', 'products.bar', 'products.baz'):
-        provideUtility(sdc, ISessionDataContainer, product_id)
-    request = HTTPRequest(StringIO(), {}, None)
-    return request
-
-def tearDown(_test=None):
-    cleanup.tearDown()
-
 # Test the code in our API documentation is correct
-def docSetUp(test):
-    from zope.session.session import RAMSessionDataContainer
-    test.globs['request'] = setUp(RAMSessionDataContainer)
-
-
 def tearDownTransaction(test):
     import transaction
     transaction.abort()
 
 
 class TestSessions(cleanup.CleanUp, unittest.TestCase):
-
-    def setUp(self):
-        self.request = setUp()
 
     def test_conflicts(self):
         # The SessionData objects have been plagued with unnecessary
@@ -78,6 +41,7 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         tmpdir = tempfile.mkdtemp(prefix='zope.session-', suffix='-test')
         self.addCleanup(shutil.rmtree, tmpdir)
         db = ZODB.DB(os.path.join(tmpdir, 'testConflicts-Data.fs'))
+        self.addCleanup(db.close)
         from zope.session.session import PersistentSessionDataContainer, SessionData
         import transaction
         tm_A = transaction.TransactionManager()
@@ -123,9 +87,20 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         # NotImplementedError and TypeError, respectively, in order to avoid
         # an infinite loop if iteration or a test for containment is
         # attempted on an instance.
-
+        from io import BytesIO
+        from zope.publisher.http import HTTPRequest
+        from zope.publisher.interfaces import IRequest
+        from zope.component import provideAdapter
+        from zope.component import provideUtility
+        from zope.session.interfaces import IClientId
+        from zope.session.interfaces import IClientIdManager
+        from zope.session.http import CookieClientIdManager
         import zope.session.session
-        request = self.request
+
+        provideUtility(CookieClientIdManager(), IClientIdManager)
+        provideAdapter(zope.session.session.ClientId, (IRequest,), IClientId)
+
+        request = HTTPRequest(BytesIO(), {}, None)
         session = zope.session.session.Session(request)
         with self.assertRaises(TypeError):
             'blah' in session
@@ -164,12 +139,6 @@ def test_suite():
     suite.addTest(doctest.DocTestSuite(
         'zope.session.http',
         checker=checker,
-        optionflags=flags))
-    suite.addTest(doctest.DocFileSuite(
-        'api.rst', 'design.rst',
-        checker=checker,
-        setUp=docSetUp,
-        tearDown=tearDown,
         optionflags=flags))
     return suite
 

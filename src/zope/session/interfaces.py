@@ -22,10 +22,15 @@ from zope.i18nmessageid import ZopeMessageFactory as _
 __docformat__ = 'restructuredtext'
 
 class IClientIdManager(Interface):
-    """Manages sessions - fake state over multiple client requests."""
+    """
+    Manages client identifiers.
+
+    .. seealso:: `zope.session.http.ICookieClientIdManager`
+    """
 
     def getClientId(request):
-        """Return the client id for the given request as a string.
+        """
+        Return the client id for the given request as a string.
 
         If the request doesn't have an attached sessionId a new one will be
         generated.
@@ -34,19 +39,19 @@ class IClientIdManager(Interface):
         session id will be preserved. Depending on the specific method,
         further action might be necessary on the part of the user.  See the
         documentation for the specific implementation and its interfaces.
-
         """
 
 
 class IClientId(Interface):
-    """A unique id representing a session"""
+    """A unique id representing a session."""
 
     def __str__():
         """As a unique ASCII string"""
 
 
 class ISessionDataContainer(IReadMapping, IWriteMapping):
-    """Stores data objects for sessions.
+    """
+    Stores data objects for sessions.
 
     The object implementing this interface is responsible for expiring data as
     it feels appropriate.
@@ -56,9 +61,8 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
       session_data_container[client_id][product_id][key] = value
 
     Note that this interface does not support the full mapping interface -
-    the keys need to remain secret so we can't give access to keys(),
-    values() etc.
-
+    the keys need to remain secret so we can't give access to :meth:`keys`,
+    :meth:`values` etc.
     """
     timeout = schema.Int(
         title=_(u"Timeout"),
@@ -91,46 +95,55 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
 
 
 class ISession(Interface):
-    """This object allows retrieval of the correct ISessionData
-    for a particular product id
+    """
+    This object allows retrieval of the correct `ISessionData` for a
+    particular product id.
 
-        >>> session = ISession(request)[product_id]
-        >>> session['color'] = 'red'
-        True
+    For example::
 
-        >>> ISessionData.providedBy(session)
-        True
-
+        session = ISession(request)[product_id]
+        session['color'] = 'red'
+        assert ISessionData.providedBy(session)
     """
 
     def __getitem__(product_id):
-        """Return the relevant ISessionPkgData
+        """
+        Return the relevant `ISessionData`.
 
-        This involves locating the correct ISessionDataContainer for the
+        This involves locating the correct `ISessionDataContainer` for the
         given product id, determining the client id, and returning the
-        relevant ISessionPkgData.
+        relevant `ISessionData`.
 
-        Caution: This method implicitly creates a new session for the user
-                 when it does not exist yet.
-
+        .. caution::
+               This method implicitly creates a new session for the user
+               when it does not exist yet.
         """
 
     def get(product_id, default=None):
-        """Return the relevant ISessionPkgData or default if not available."""
+        """
+        Return the relevant `ISessionPkgData` or *default* if not
+        available.
+        """
 
 
 class ISessionData(IMapping):
-    """Storage for a particular product id's session data
+    """
+    Storage for a particular product id's session data.
 
-    Contains 0 or more ISessionPkgData instances
-
+    Contains 0 or more `ISessionPkgData` instances.
     """
 
     def getLastAccessTime():
-        "return approximate epoch time this ISessionData was last retrieved"
+        """
+        Return approximate epoch time this `ISessionData` was last
+        retrieved.
+        """
 
     def setLastAccessTime():
-        "An API for ISessionDataContainer to set the last retrieved epoch time"
+        """
+        An API for `ISessionDataContainer` to set the last retrieved epoch
+        time.
+        """
 
     # consider deprecating this property, or at least making it readonly.  The
     # setter should be used instead of setting this property because of
@@ -149,16 +162,16 @@ class ISessionData(IMapping):
     # We cannot give access to the keys, as they need to remain secret.
 
     def __getitem__(self, client_id):
-        """Return an ISessionPkgData"""
+        """Return an `ISessionPkgData`"""
 
     def __setitem__(self, client_id, session_pkg_data):
-        """Store an ISessionPkgData"""
+        """Store an `ISessionPkgData`"""
 
 
 class ISessionPkgData(IMapping):
-    """Storage for a particular product id and browser id's session data
+    """
+    Storage for a particular product id and browser id's session data
 
     Data is stored persistently and transactionally. Data stored must
     be persistent or picklable.
-
     """

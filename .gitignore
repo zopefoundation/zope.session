@@ -11,3 +11,4 @@ parts/
 .tox/
 .coverage
 htmlcov/
+docs/_build/
