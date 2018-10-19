@@ -2,8 +2,10 @@
  CHANGES
 =========
 
-4.2.1 (unreleased)
+4.3.0 (unreleased)
 ==================
+
+- Add support for Python 3.7.
 
 - Host documentation at https://zopesession.readthedocs.io
 
