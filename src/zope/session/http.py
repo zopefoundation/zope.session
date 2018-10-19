@@ -21,6 +21,14 @@ import time
 from hashlib import sha1
 from email.utils import formatdate
 
+try:
+    # Python 3.3+: OS-independent CPU counter
+    from time import process_time
+except ImportError: # pragma: no cover
+    # Python 2.7
+    from time import clock as process_time
+
+
 from persistent import Persistent
 import zope.location
 from zope import schema
@@ -297,7 +305,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           True
 
         """
-        data = "%.20f%.20f%.20f" % (random.random(), time.time(), time.clock())
+        data = "%.20f%.20f%.20f" % (random.random(), time.time(), process_time())
         digest = sha1(data.encode()).digest()
         s = digestEncode(digest)
         # we store a HMAC of the random value together with it, which makes

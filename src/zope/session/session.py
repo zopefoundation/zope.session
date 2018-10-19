@@ -28,7 +28,7 @@ import zope.minmax
 
 import zope.component
 import zope.interface
-from zope.component.interfaces import ComponentLookupError
+from zope.interface.interfaces import ComponentLookupError
 from zope.publisher.interfaces import IRequest
 
 from zope.session.interfaces import \
