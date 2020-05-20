@@ -1,5 +1,10 @@
 language: python
 sudo: false
+
+env:
+  global:
+    ZOPE_INTERFACE_STRICT_IRO: 1
+
 python:
     - 2.7
     - 3.4
