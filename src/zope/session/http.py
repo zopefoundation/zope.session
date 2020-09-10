@@ -130,7 +130,7 @@ class ICookieClientIdManager(IClientIdManager):
         )
 
 
-@implementer(IClientIdManager, ICookieClientIdManager)
+@implementer(ICookieClientIdManager)
 class CookieClientIdManager(zope.location.Location, Persistent):
     """
     Default implementation of `ICookieClientIdManager`.

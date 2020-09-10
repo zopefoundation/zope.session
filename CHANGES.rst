@@ -40,6 +40,7 @@
 
 - Add support for testing on Travis.
 
+- Fix inconsistent resolution order with zope.interface v5.
 
 4.0.0a2 (2013-08-27)
 ====================
