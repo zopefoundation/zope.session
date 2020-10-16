@@ -2,7 +2,7 @@
  CHANGES
 =========
 
-4.4.0 (unreleased)
+4.4.0 (2020-10-16)
 ==================
 
 - Fix inconsistent resolution order with zope.interface v5.
