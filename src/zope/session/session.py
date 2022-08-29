@@ -16,24 +16,26 @@
 import base64
 import random
 import time
-from heapq import heapify, heappop
+from heapq import heapify
+from heapq import heappop
 
 import persistent
-from BTrees.OOBTree import OOBTree
-
 import ZODB
 import ZODB.MappingStorage
-import zope.location
-import zope.minmax
-
 import zope.component
 import zope.interface
+import zope.location
+import zope.minmax
+from BTrees.OOBTree import OOBTree
 from zope.interface.interfaces import ComponentLookupError
 from zope.publisher.interfaces import IRequest
 
-from zope.session.interfaces import \
-        IClientIdManager, IClientId, ISession, ISessionDataContainer, \
-        ISessionPkgData, ISessionData
+from zope.session.interfaces import IClientId
+from zope.session.interfaces import IClientIdManager
+from zope.session.interfaces import ISession
+from zope.session.interfaces import ISessionData
+from zope.session.interfaces import ISessionDataContainer
+from zope.session.interfaces import ISessionPkgData
 
 
 try:

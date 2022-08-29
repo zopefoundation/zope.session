@@ -14,7 +14,9 @@
 """Session tests
 """
 import unittest
+
 from zope.testing import cleanup
+
 
 # Test the code in our API documentation is correct
 def tearDownTransaction(test):
@@ -37,13 +39,16 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         import os
         import shutil
         import tempfile
+
         import ZODB.DB
         tmpdir = tempfile.mkdtemp(prefix='zope.session-', suffix='-test')
         self.addCleanup(shutil.rmtree, tmpdir)
         db = ZODB.DB(os.path.join(tmpdir, 'testConflicts-Data.fs'))
         self.addCleanup(db.close)
-        from zope.session.session import PersistentSessionDataContainer, SessionData
         import transaction
+
+        from zope.session.session import PersistentSessionDataContainer
+        from zope.session.session import SessionData
         tm_A = transaction.TransactionManager()
         conn_A = db.open(transaction_manager=tm_A)
         self.addCleanup(conn_A.close)
@@ -88,14 +93,16 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         # an infinite loop if iteration or a test for containment is
         # attempted on an instance.
         from io import BytesIO
-        from zope.publisher.http import HTTPRequest
-        from zope.publisher.interfaces import IRequest
+
         from zope.component import provideAdapter
         from zope.component import provideUtility
+        from zope.publisher.http import HTTPRequest
+        from zope.publisher.interfaces import IRequest
+
+        import zope.session.session
+        from zope.session.http import CookieClientIdManager
         from zope.session.interfaces import IClientId
         from zope.session.interfaces import IClientIdManager
-        from zope.session.http import CookieClientIdManager
-        import zope.session.session
 
         provideUtility(CookieClientIdManager(), IClientIdManager)
         provideAdapter(zope.session.session.ClientId, (IRequest,), IClientId)
@@ -112,6 +119,7 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
 def test_suite():
     import doctest
     import re
+
     from zope.testing import renormalizing
 
     checker = renormalizing.RENormalizing([

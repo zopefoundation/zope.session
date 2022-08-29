@@ -18,8 +18,9 @@ import logging
 import random
 import re
 import time
-from hashlib import sha1
 from email.utils import formatdate
+from hashlib import sha1
+
 
 try:
     # Python 3.3+: OS-independent CPU counter
@@ -28,17 +29,16 @@ except ImportError: # pragma: no cover
     # Python 2.7
     from time import clock as process_time
 
-
-from persistent import Persistent
 import zope.location
-from zope import schema
-from zope import component
-from zope.interface import implementer
-from zope.publisher.interfaces.http import IHTTPRequest
-from zope.publisher.interfaces.http import IHTTPApplicationRequest
+from persistent import Persistent
 from zope.i18nmessageid import ZopeMessageFactory as _
+from zope.interface import implementer
+from zope.publisher.interfaces.http import IHTTPApplicationRequest
+from zope.publisher.interfaces.http import IHTTPRequest
 from zope.schema.fieldproperty import FieldProperty
 
+from zope import component
+from zope import schema
 from zope.session.interfaces import IClientIdManager
 from zope.session.session import digestEncode
 
