@@ -52,7 +52,7 @@ except ImportError:
 
 _PY3 = bytes is not str
 encodebytes = base64.encodebytes if _PY3 else base64.encodestring
-text_type = str if _PY3 else unicode
+text_type = str if _PY3 else unicode  # noqa: F821 undefined name 'unicode' PY2
 
 try:
     import string
@@ -60,6 +60,7 @@ try:
 except AttributeError:
     # Python 3
     transtable = bytes.maketrans(b'+/', b'-.')
+
 
 def digestEncode(s):
     """Encode SHA digest for cookie."""
@@ -79,7 +80,8 @@ class ClientId(text_type):
         >>> from io import BytesIO
         >>> from zope.session.interfaces import IClientIdManager
         >>> from zope.session.http import CookieClientIdManager
-        >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
+        >>> zope.component.provideUtility(
+        ...     CookieClientIdManager(), IClientIdManager)
 
     `ClientId` objects for the same request should be equal:
 
@@ -108,11 +110,11 @@ class PersistentSessionDataContainer(zope.location.Location,
                                      persistent.Persistent,
                                      UserDict):
     """
-    A `zope.session.interfaces.ISessionDataContainer` that stores data in the ZODB.
+    A `zope.session.interfaces.ISessionDataContainer` that stores data in the
+    ZODB.
     """
 
-
-    _v_last_sweep = 0 # Epoch time sweep last run
+    _v_last_sweep = 0  # Epoch time sweep last run
     disable_implicit_sweeps = False
 
     def __init__(self):
@@ -320,8 +322,8 @@ class PersistentSessionDataContainer(zope.location.Location,
             >>> sdc['1'] = SessionData()
             >>> sdc['2'] = SessionData()
 
-        Wind back the clock on one of the `zope.session.interfaces.ISessionData`'s
-        so it gets garbage collected
+        Wind back the clock on one of the
+        `zope.session.interfaces.ISessionData`'s so it gets garbage collected
 
             >>> sdc['2'].setLastAccessTime(
             ...     sdc['2'].getLastAccessTime() - sdc.timeout * 2)
@@ -365,8 +367,9 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
         >>> ISessionData.providedBy(sdc['1'])
         True
     """
+
     def __init__(self):
-        self.resolution = 5*60
+        self.resolution = 5 * 60
         self.timeout = 1 * 60 * 60
         # Something unique
         self.key = '%s.%s.%s' % (time.time(), random.random(), id(self))
@@ -425,7 +428,8 @@ class Session(object):
             >>> from zope.session.interfaces import IClientIdManager, IClientId
             >>> from zope.session.interfaces import ISessionDataContainer
             >>> from zope.session.http import CookieClientIdManager
-            >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
+            >>> zope.component.provideUtility(
+            ...     CookieClientIdManager(), IClientIdManager)
             >>> zope.component.provideAdapter(ClientId, (IRequest,), IClientId)
             >>> sdc = PersistentSessionDataContainer()
             >>> zope.component.provideUtility(sdc, ISessionDataContainer, '')
@@ -461,7 +465,6 @@ class Session(object):
             >>> zope.testing.cleanup.tearDown()
         """
 
-
         # The ISessionDataContainer contains two levels:
         # ISessionDataContainer[client_id] == ISessionData
         # ISessionDataContainer[client_id][pkg_id] == ISessionPkgData
@@ -472,7 +475,6 @@ class Session(object):
             return default
 
         return sd.get(pkg_id, default)
-
 
     def __getitem__(self, pkg_id):
         """
@@ -487,11 +489,13 @@ class Session(object):
             >>> from zope.session.interfaces import IClientIdManager, IClientId
             >>> from zope.session.http import CookieClientIdManager
             >>> from zope.session.interfaces import ISessionDataContainer
-            >>> zope.component.provideUtility(CookieClientIdManager(), IClientIdManager)
+            >>> zope.component.provideUtility(
+            ...     CookieClientIdManager(), IClientIdManager)
             >>> zope.component.provideAdapter(ClientId, (IRequest,), IClientId)
             >>> sdc = PersistentSessionDataContainer()
             >>> for product_id in ('', 'products.foo', 'products.bar'):
-            ...     zope.component.provideUtility(sdc, ISessionDataContainer, product_id)
+            ...     zope.component.provideUtility(
+            ...         sdc, ISessionDataContainer, product_id)
 
         Setup some sessions, each with a distinct namespace:
 
@@ -583,28 +587,28 @@ class SessionData(persistent.Persistent, UserDict):
         >>> session.getLastAccessTime()
         0
 
-    Before the `zope.minmax.Maximum` object this class used to have an attribute
-    ``lastAccessTime`` initialized in the class itself to zero.
-    To avoid changing the interface, that attribute has been turned into a
+    Before the `zope.minmax.Maximum` object this class used to have an
+    attribute ``lastAccessTime`` initialized in the class itself to zero. To
+    avoid changing the interface, that attribute has been turned into a
     property.  This part tests the behavior of a legacy session which would
-    have the lastAccessTime attribute loaded from the database.
-    The implementation should work for that case as well as with the new
-    session where ``lastAccessTime`` is a property. These tests will
-    be removed in a later release (see the comments in the code below).
+    have the lastAccessTime attribute loaded from the database. The
+    implementation should work for that case as well as with the new session
+    where ``lastAccessTime`` is a property. These tests will be removed in a
+    later release (see the comments in the code below).
 
     First, create an instance of `SessionData` and remove a protected attribute
-    ``_lastAccessTime`` from it to make it more like the legacy `SessionData`.  The
-    subsequent attempt to get ``lastAccessTime`` will return a 0, because the
-    ``lastAccessTime`` is not there and the dictionary returns the default value
-    zero supplied to its `get` method.
+    ``_lastAccessTime`` from it to make it more like the legacy `SessionData`.
+    The subsequent attempt to get ``lastAccessTime`` will return a 0, because
+    the ``lastAccessTime`` is not there and the dictionary returns the default
+    value zero supplied to its `get` method.
 
         >>> legacy_session = SessionData()
         >>> del legacy_session._lastAccessTime
         >>> legacy_session.getLastAccessTime()
         0
 
-    Now, artificially add ``lastAccessTime`` to the instance's dictionary.
-    This should make it exactly like the legacy `SessionData`.
+    Now, artificially add ``lastAccessTime`` to the instance's dictionary. This
+    should make it exactly like the legacy `SessionData`.
 
         >>> legacy_session.__dict__['lastAccessTime'] = 42
         >>> legacy_session.getLastAccessTime()
@@ -646,7 +650,7 @@ class SessionData(persistent.Persistent, UserDict):
         self._lastAccessTime.value = value
 
     lastAccessTime = property(fget=getLastAccessTime,
-                              fset=setLastAccessTime, # consider deprecating
+                              fset=setLastAccessTime,  # consider deprecating
                               doc='integer value of the last access time')
 
 

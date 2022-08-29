@@ -25,7 +25,7 @@ from hashlib import sha1
 try:
     # Python 3.3+: OS-independent CPU counter
     from time import process_time
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     # Python 2.7
     from time import clock as process_time
 
@@ -45,8 +45,10 @@ from zope.session.session import digestEncode
 
 logger = logging.getLogger(__name__)
 
+
 class MissingClientIdException(Exception):
     """No ClientId found in Request"""
+
 
 class ICookieClientIdManager(IClientIdManager):
     """
@@ -103,11 +105,10 @@ class ICookieClientIdManager(IClientIdManager):
             "identification cookie for multiple subdomains. So if this "
             "option is set to ``.example.org``, the cookie will be available "
             "for subdomains like ``yourname.example.org``. "
-            "Note that if you set this option to some domain, the identification "
-            "cookie won't be available for other domains, so, for example "
-            "you won't be able to login using the SessionCredentials plugin "
-            "via another domain."
-        ),
+            "Note that if you set this option to some domain, the "
+            "identification cookie won't be available for other domains, so, "
+            "for example you won't be able to login using the "
+            "SessionCredentials plugin via another domain."),
         required=False,
     )
 
@@ -115,19 +116,19 @@ class ICookieClientIdManager(IClientIdManager):
         title=_('Request Secure communication'),
         required=False,
         default=False,
-        )
+    )
 
     postOnly = schema.Bool(
         title=_('Only set cookie on POST requests'),
         required=False,
         default=False,
-        )
+    )
 
     httpOnly = schema.Bool(
         title=_('The cookie cannot be accessed through client side scripts'),
         required=False,
         default=False,
-        )
+    )
 
 
 @implementer(ICookieClientIdManager)
@@ -135,7 +136,6 @@ class CookieClientIdManager(zope.location.Location, Persistent):
     """
     Default implementation of `ICookieClientIdManager`.
     """
-
 
     thirdparty = FieldProperty(ICookieClientIdManager['thirdparty'])
     cookieLifetime = FieldProperty(ICookieClientIdManager['cookieLifetime'])
@@ -305,7 +305,8 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           True
 
         """
-        data = "%.20f%.20f%.20f" % (random.random(), time.time(), process_time())
+        data = "%.20f%.20f%.20f" % (
+            random.random(), time.time(), process_time())
         digest = sha1(data.encode()).digest()
         s = digestEncode(digest)
         # we store a HMAC of the random value together with it, which makes
@@ -390,7 +391,6 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         if self.thirdparty:
             return sid
-
 
         # If there is an id set on the response, use that but
         # don't trust it.  We need to check the response in case
@@ -559,9 +559,12 @@ class CookieClientIdManager(zope.location.Location, Persistent):
             path=request.getApplicationURL(path_only=True),
             **options)
 
-        response.setHeader('Cache-Control', 'no-cache="Set-Cookie,Set-Cookie2"')
+        response.setHeader(
+            'Cache-Control',
+            'no-cache="Set-Cookie,Set-Cookie2"')
         response.setHeader('Pragma', 'no-cache')
         response.setHeader('Expires', 'Mon, 26 Jul 1997 05:00:00 GMT')
+
 
 def notifyVirtualHostChanged(event):
     """
