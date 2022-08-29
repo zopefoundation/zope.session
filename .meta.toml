@@ -20,3 +20,8 @@ testenv-setenv = [
 
 [coverage]
 fail-under = 99
+
+[manifest]
+additional-rules = [
+    "recursive-include src *.zcml",
+    ]

@@ -2,10 +2,10 @@
  CHANGES
 =========
 
-4.4.1 (unreleased)
-==================
+4.5 (unreleased)
+================
 
-- Nothing changed yet.
+- Add support for Python 3.5, 3.9, 3.10.
 
 
 4.4.0 (2020-10-16)
