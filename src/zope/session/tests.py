@@ -28,13 +28,13 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
 
     def test_conflicts(self):
         # The SessionData objects have been plagued with unnecessary
-        # ConflictErrors.  The current implementation makes the most common source
-        # of ConflictErrors in the past, setting the lastAccessTime, no longer a
-        # problem in this regard.
+        # ConflictErrors.  The current implementation makes the most common
+        # source of ConflictErrors in the past, setting the lastAccessTime, no
+        # longer a problem in this regard.
 
-        # To illustrate this, we will do a bit of an integration test.  We'll begin
-        # by getting a connection and putting a session data container in the root,
-        # within transaction manager "A".
+        # To illustrate this, we will do a bit of an integration test.  We'll
+        # begin by getting a connection and putting a session data container in
+        # the root, within transaction manager "A".
 
         import os
         import shutil
@@ -60,15 +60,15 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         sd_A.setLastAccessTime(then)
         tm_A.commit()
 
-        # Now we have a session data container with a session data lastAccessTime
-        # that is set to four seconds ago.  Since we set the resolution to three
-        # seconds, the next time the session is accessed, the lastAccessTime should
-        # be updated.
+        # Now we have a session data container with a session data
+        # lastAccessTime that is set to four seconds ago.  Since we set the
+        # resolution to three seconds, the next time the session is accessed,
+        # the lastAccessTime should be updated.
 
-        # We will access the session simultaneously in two transactions, which will
-        # set the updated lastAccessTime on both objects, and then commit.  Because
-        # of the conflict resolution code in zope.minmax, both commits will succeed,
-        # which is what we wanted to demonstrate.
+        # We will access the session simultaneously in two transactions, which
+        # will set the updated lastAccessTime on both objects, and then commit.
+        # Because of the conflict resolution code in zope.minmax, both commits
+        # will succeed, which is what we wanted to demonstrate.
 
         tm_B = transaction.TransactionManager()
         conn_B = db.open(transaction_manager=tm_B)
@@ -76,11 +76,11 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
         root_B = conn_B.root()
         sdc_B = root_B['sdc']
 
-        sd_B = sdc_B['clientid'] # has side effect of updating lastAccessTime
+        sd_B = sdc_B['clientid']  # has side effect of updating lastAccessTime
         self.assertGreater(sd_B.getLastAccessTime(), then)
 
-
-        self.assertIs(sd_A, sdc_A['clientid']) # has side effect of updating lastAccessTime
+        # has side effect of updating lastAccessTime
+        self.assertIs(sd_A, sdc_A['clientid'])
         self.assertGreater(sd_A.getLastAccessTime(), then)
 
         tm_A.commit()
@@ -136,7 +136,7 @@ def test_suite():
         # Python 3 adds module name to exceptions.
         (re.compile("zope.session.http.MissingClientIdException"),
          r"MissingClientIdException"),
-        ])
+    ])
     flags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
     suite = unittest.defaultTestLoader.loadTestsFromName(__name__)
 

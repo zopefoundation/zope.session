@@ -28,6 +28,7 @@ def read(*rnames):
     with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
         return f.read()
 
+
 TESTS_REQUIRE = [
     'zope.configuration',
     'zope.traversing',
@@ -69,7 +70,7 @@ setup(name='zope.session',
       url='https://github.com/zopefoundation/zope.session',
       packages=find_packages('src'),
       package_dir={'': 'src'},
-      namespace_packages=['zope',],
+      namespace_packages=['zope', ],
       install_requires=[
           'setuptools',
           'ZODB >= 4.2.0.b1',
@@ -91,4 +92,4 @@ setup(name='zope.session',
       test_suite='zope.session.tests.test_suite',
       include_package_data=True,
       zip_safe=False,
-)
+      )
