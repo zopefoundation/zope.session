@@ -13,10 +13,13 @@
 ##############################################################################
 """Interfaces for session utility.
 """
-from zope.interface import Interface
-from zope.interface.common.mapping import IMapping, IReadMapping, IWriteMapping
-from zope import schema
 from zope.i18nmessageid import ZopeMessageFactory as _
+from zope.interface import Interface
+from zope.interface.common.mapping import IMapping
+from zope.interface.common.mapping import IReadMapping
+from zope.interface.common.mapping import IWriteMapping
+
+from zope import schema
 
 
 __docformat__ = 'restructuredtext'
