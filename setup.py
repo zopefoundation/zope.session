@@ -37,7 +37,7 @@ TESTS_REQUIRE = [
 ]
 
 setup(name='zope.session',
-      version='4.5',
+      version='4.6.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Client identification and sessions for Zope',
