@@ -5,7 +5,7 @@
 4.6 (unreleased)
 ================
 
-- Nothing changed yet.
+- Add support for Python 3.11.
 
 
 4.5 (2022-08-30)
