@@ -16,8 +16,10 @@
 import base64
 import random
 import time
+from collections import UserDict
 from heapq import heapify
 from heapq import heappop
+from threading import get_ident
 
 import persistent
 import ZODB
@@ -38,38 +40,17 @@ from zope.session.interfaces import ISessionDataContainer
 from zope.session.interfaces import ISessionPkgData
 
 
-try:
-    from UserDict import IterableUserDict as UserDict
-except ImportError:
-    # Py3: New UserDict location.
-    from collections import UserDict
-
-try:
-    from thread import get_ident
-except ImportError:
-    # Py3: New get_ident location
-    from threading import get_ident
-
-_PY3 = bytes is not str
-encodebytes = base64.encodebytes if _PY3 else base64.encodestring
-text_type = str if _PY3 else unicode  # noqa: F821 undefined name 'unicode' PY2
-
-try:
-    import string
-    transtable = string.maketrans(b'+/', b'-.')
-except AttributeError:
-    # Python 3
-    transtable = bytes.maketrans(b'+/', b'-.')
+transtable = bytes.maketrans(b'+/', b'-.')
 
 
 def digestEncode(s):
     """Encode SHA digest for cookie."""
-    return encodebytes(s)[:-2].translate(transtable)
+    return base64.encodebytes(s)[:-2].translate(transtable)
 
 
 @zope.interface.implementer(IClientId)
 @zope.component.adapter(IRequest)
-class ClientId(text_type):
+class ClientId(str):
     """
     Default implementation of `zope.session.interfaces.IClientId`.
 
@@ -102,7 +83,7 @@ class ClientId(text_type):
     def __new__(cls, request):
         id_manager = zope.component.getUtility(IClientIdManager)
         cid = id_manager.getClientId(request)
-        return text_type.__new__(cls, cid)
+        return str.__new__(cls, cid)
 
 
 @zope.interface.implementer(ISessionDataContainer)
@@ -372,7 +353,7 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
         self.resolution = 5 * 60
         self.timeout = 1 * 60 * 60
         # Something unique
-        self.key = '%s.%s.%s' % (time.time(), random.random(), id(self))
+        self.key = '{}.{}.{}'.format(time.time(), random.random(), id(self))
 
     _ram_storage = ZODB.MappingStorage.MappingStorage()
     _ram_db = ZODB.DB(_ram_storage)
@@ -393,13 +374,13 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
     data = property(_getData, None)
 
     def sweep(self):
-        super(RAMSessionDataContainer, self).sweep()
+        super().sweep()
         self._ram_db.pack(time.time())
 
 
 @zope.interface.implementer(ISession)
 @zope.component.adapter(IRequest)
-class Session(object):
+class Session:
     """
     Default implementation of  `zope.session.interfaces.ISession`
     """

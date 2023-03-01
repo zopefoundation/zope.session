@@ -118,38 +118,14 @@ class TestSessions(cleanup.CleanUp, unittest.TestCase):
 
 def test_suite():
     import doctest
-    import re
 
-    from zope.testing import renormalizing
-
-    checker = renormalizing.RENormalizing([
-        # Python 3 strings remove the "u".
-        (re.compile("u('.*?')"),
-         r"\1"),
-        (re.compile('u(".*?")'),
-         r"\1"),
-        # Python 3 bytes add a "b".
-        (re.compile("b('.*?')"),
-         r"\1"),
-        (re.compile('b(".*?")'),
-         r"\1"),
-        # Python 3 adds module name to exceptions.
-        (re.compile("zope.session.http.MissingClientIdException"),
-         r"MissingClientIdException"),
-    ])
     flags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
     suite = unittest.defaultTestLoader.loadTestsFromName(__name__)
 
     suite.addTest(doctest.DocTestSuite(
         'zope.session.session',
-        checker=checker,
         tearDown=tearDownTransaction))
     suite.addTest(doctest.DocTestSuite(
         'zope.session.http',
-        checker=checker,
         optionflags=flags))
     return suite
-
-
-if __name__ == '__main__':
-    unittest.main()
