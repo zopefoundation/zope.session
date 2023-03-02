@@ -69,7 +69,7 @@ class ISessionDataContainer(IReadMapping, IWriteMapping):
     :meth:`values` etc.
     """
     timeout = schema.Int(
-        title=_(u"Timeout"),
+        title=_("Timeout"),
         description=_(
             "Number of seconds before data becomes stale and may "
             "be removed. A value of '0' means no expiration."),

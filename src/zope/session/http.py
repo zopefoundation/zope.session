@@ -20,14 +20,7 @@ import re
 import time
 from email.utils import formatdate
 from hashlib import sha1
-
-
-try:
-    # Python 3.3+: OS-independent CPU counter
-    from time import process_time
-except ImportError:  # pragma: no cover
-    # Python 2.7
-    from time import clock as process_time
+from time import process_time
 
 import zope.location
 from persistent import Persistent
@@ -188,7 +181,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         if namespace is None:
             namespace = "zope3_cs_%x" % (int(time.time()) - 1000000000)
         if secret is None:
-            secret = u'%.20f' % random.random()
+            secret = '%.20f' % random.random()
         self.namespace = namespace
         self.secret = secret
 
@@ -221,7 +214,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
         an `.IClientId`. This is because this method is used to implement
         the `.IClientId` Adapter.
 
-          >>> type(id) == type(u'')
+          >>> type(id) == str
           True
 
         We don't set the client id unless we need to, so, for example,
@@ -249,7 +242,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.getClientId(request)
           Traceback (most recent call last):
           ...
-          MissingClientIdException
+          zope.session.http.MissingClientIdException
 
           >>> print(request.response.getCookie(bim.namespace))
           None
@@ -274,7 +267,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           >>> bim.getClientId(request)
           Traceback (most recent call last):
           ...
-          MissingClientIdException
+          zope.session.http.MissingClientIdException
 
           >>> print(request.response.getCookie(bim.namespace))
           None
@@ -305,7 +298,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
           True
 
         """
-        data = "%.20f%.20f%.20f" % (
+        data = "{:.20f}{:.20f}{:.20f}".format(
             random.random(), time.time(), process_time())
         digest = sha1(data.encode()).digest()
         s = digestEncode(digest)
@@ -492,7 +485,7 @@ class CookieClientIdManager(zope.location.Location, Persistent):
 
         If the domain is specified, it will be set as a cookie attribute.
 
-          >>> bim.domain = u'.example.org'
+          >>> bim.domain = '.example.org'
           >>> bim.setRequestId(request, '1234')
           >>> cookie = request.response.getCookie(bim.namespace)
           >>> print(cookie['domain'])
