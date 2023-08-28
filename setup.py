@@ -31,7 +31,6 @@ def read(*rnames):
 
 TESTS_REQUIRE = [
     'zope.configuration',
-    'zope.traversing',
     'zope.testing',
     'zope.testrunner',
 ]
@@ -81,6 +80,7 @@ setup(name='zope.session',
           'zope.location',
           'zope.publisher >= 4.1.0',
           'zope.minmax',
+          'zope.traversing',
       ],
       extras_require={
           'test': TESTS_REQUIRE,

@@ -5,7 +5,7 @@
 5.1 (unreleased)
 ================
 
-- Nothing changed yet.
+- Declare ``zope.traversing`` as install dependency.
 
 
 5.0 (2023-03-02)
