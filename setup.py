@@ -89,8 +89,6 @@ setup(name='zope.session',
               'repoze.sphinx.autointerface',
           ],
       },
-      tests_require=TESTS_REQUIRE,
-      test_suite='zope.session.tests.test_suite',
       include_package_data=True,
       zip_safe=False,
       )
