@@ -16,6 +16,7 @@
 import sys
 import os
 import pkg_resources
+
 sys.path.append(os.path.abspath('../src'))
 rqmt = pkg_resources.require('zope.session')[0]
 
@@ -54,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'zope.session'
-copyright = '2015-2017, Zope Foundation and Contributors'
+copyright = '2015-2024, Zope Foundation and Contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -102,7 +103,6 @@ pygments_style = 'sphinx'
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
-
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -188,26 +188,25 @@ html_theme = 'default'
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'zopesessiondoc'
 
-
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'zopesession.tex', 'zope.session Documentation',
-   'Zope Foundation and Contributors', 'manual'),
+    ('index', 'zopesession.tex', 'zope.session Documentation',
+     'Zope Foundation and Contributors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -230,19 +229,15 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'zopesession', 'zope.session Documentation',
-     ['Zope Foundation and Contributors'], 1)
-]
+man_pages = [('index', 'zopesession', 'zope.session Documentation',
+              ['Zope Foundation and Contributors'], 1)]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
-
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -250,9 +245,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'zopesession', 'zope.session Documentation',
-   'Zope Foundation and Contributors', 'zopesession', 'One line description of project.',
-   'Miscellaneous'),
+    ('index', 'zopesession', 'zope.session Documentation',
+     'Zope Foundation and Contributors', 'zopesession',
+     'One line description of project.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -267,17 +262,19 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
-
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'https://docs.python.org/': None,
-    'https://persistent.readthedocs.io/en/latest/': None,
-    'https://zopeannotation.readthedocs.io/en/latest/': None,
-    'https://zopeconfiguration.readthedocs.io/en/latest/': None,
-    'https://zopeinterface.readthedocs.io/en/latest/': None,
-    'https://zopelocation.readthedocs.io/en/latest/': None,
-    'https://zopeminmax.readthedocs.io/en/latest/': None,
-    'https://zopetraversing.readthedocs.io/en/latest/': None,
+    'python': ('https://docs.python.org/', None),
+    'persistent': ('https://persistent.readthedocs.io/en/latest/', None),
+    'zopeannotation':
+    ('https://zopeannotation.readthedocs.io/en/latest/', None),
+    'zopeconfiguration':
+    ('https://zopeconfiguration.readthedocs.io/en/latest/', None),
+    'zopeinterface': ('https://zopeinterface.readthedocs.io/en/latest/', None),
+    'zopelocation': ('https://zopelocation.readthedocs.io/en/latest/', None),
+    'zopeminmax': ('https://zopeminmax.readthedocs.io/en/latest/', None),
+    'zopetraversing':
+    ('https://zopetraversing.readthedocs.io/en/latest/', None),
 }
 
 autodoc_default_flags = ['members', 'show-inheritance']
