@@ -353,7 +353,7 @@ class RAMSessionDataContainer(PersistentSessionDataContainer):
         self.resolution = 5 * 60
         self.timeout = 1 * 60 * 60
         # Something unique
-        self.key = '{}.{}.{}'.format(time.time(), random.random(), id(self))
+        self.key = f'{time.time()}.{random.random()}.{id(self)}'
 
     _ram_storage = ZODB.MappingStorage.MappingStorage()
     _ram_db = ZODB.DB(_ram_storage)
