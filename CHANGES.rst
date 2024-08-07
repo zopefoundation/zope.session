@@ -5,6 +5,8 @@
 5.2 (unreleased)
 ================
 
+- Drop support for Python 3.7.
+
 - Drop support for deprecated ``python setup.py test``.
 
 
