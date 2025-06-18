@@ -20,7 +20,6 @@
 """
 import os
 
-from setuptools import find_packages
 from setuptools import setup
 
 
@@ -32,7 +31,7 @@ def read(*rnames):
 TESTS_REQUIRE = [
     'zope.configuration',
     'zope.testing',
-    'zope.testrunner',
+    'zope.testrunner >= 6.4',
 ]
 
 setup(name='zope.session',
@@ -67,9 +66,6 @@ setup(name='zope.session',
           'Framework :: Zope :: 3',
       ],
       url='https://github.com/zopefoundation/zope.session',
-      packages=find_packages('src'),
-      package_dir={'': 'src'},
-      namespace_packages=['zope', ],
       python_requires='>=3.9',
       install_requires=[
           'setuptools',
